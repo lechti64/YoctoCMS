@@ -21,7 +21,7 @@ class Autoloader {
      */
     public static function autoload($class) {
         // Delete the namespace
-        $class = str_replace(__NAMESPACE__ . '\\', '', $class);
+        $class = str_replace('Yocto\\', '', $class);
         // Included the class file
         // Yocto class
         if(is_file(ROOT . '/src/' . $class . '.php')) {
