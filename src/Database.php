@@ -1,18 +1,15 @@
 <?php
 
-/**
- * Database schema:
- * -> table (directory)
- *  -> row (json file)
- *   -> column (key of the array)
- */
-
 namespace Yocto;
 
 class Database {
 
+    /**
+     * PRIVATE PROPERTIES
+     */
+
     /** @var string Database path */
-    private $path = __DIR__ . '/content/data';
+    private $path = ROOT . '/content/data';
 
     /** @var array Current row */
     private $row = [];
@@ -138,7 +135,7 @@ class Database {
         // Row not found
         if($row) {
             if(is_file($this->path . '/' . $table . '/' . $row . '.json')) {
-                $this->row = json_decode(file_get_contents($this->path . '/' . $table . '/' . $row . '.json'));
+                $this->row = json_decode(file_get_contents($this->path . '/' . $table . '/' . $row . '.json'), true);
             }
             else {
                 throw new \Exception('Row "'. $row . '" not found');
