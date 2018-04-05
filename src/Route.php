@@ -49,7 +49,7 @@ class Route {
         // Creating regex based on types
         $regex = preg_replace_callback('/\[([a-z]+)\:([a-z]+)\]/i', [$this, 'matchCallback'], $this->path);
         // Search values in url
-        if(preg_match('/' . $regex . '/i', $url, $matches) > 0) {
+        if(preg_match('/^' . $regex . '$/i', $url, $matches) > 0) {
             array_shift($matches);
             $this->matches = $matches;
             return true;
