@@ -1,3 +1,3 @@
-Test : ?page=test&action=edit
-
-À terminer : ajouter PHPDOC dans les classes src
+Tests :
+?page=test&action=edit
+?page=test&action=
