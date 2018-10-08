@@ -1,5 +1,5 @@
 ## URL rewriting
-RewriteEngine on
-RewriteConf %{REQUEST_FILENAME} !-f
-RewriteConf %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?$1 [L]
+##RewriteEngine on
+##RewriteConf %{REQUEST_FILENAME} !-f
+##RewriteConf %{REQUEST_FILENAME} !-d
+##RewriteRule ^(.*)$ index.php?$1 [L]
