@@ -5,20 +5,30 @@ namespace Yocto;
 class Init {
 
     /**
+     * PRIVATE PROPERTIES
+     */
+
+    private $db;
+
+    private $pageId;
+
+    /**
      * PUBLIC METHODS
      */
 
     /**
-     * Controller constructor.
+     * Init constructor.
      * @param $pageId
      * @throws \Exception
      */
     public function __construct($pageId) {
-        $db = new Database();
-        $pageType = $db->select('page', $pageId, 'type');
+        // Database
+        $this->db = new Database();
+        // Current page id
+        $this->pageId = $pageId;
         // Router
         /** @var Controller $controller */
-        $controller = require ROOT . '/type/' . $pageType . '/router.php';
+        $controller = require ROOT . '/type/' . $this->db->select('page', $this->pageId, 'type') . '/router.php';
         // Layout
         $controller->loadLayout();
     }

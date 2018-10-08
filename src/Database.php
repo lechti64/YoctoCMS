@@ -64,7 +64,7 @@ class Database {
             throw new \Exception('Table "' . $table . '" was not created');
         }
         // Insert row
-        if(file_put_contents($this->path . '/' . $table . '/' . $row . '.json', json_encode($data)) === false) {
+        if(file_put_contents($this->path . '/' . $table . '/' . $row . '.json', json_encode($data, JSON_PRETTY_PRINT)) === false) {
             throw new \Exception('Row "' . $row . '" was not inserted');
         }
     }
@@ -111,7 +111,7 @@ class Database {
         $this->check($table, $row, $column);
         // Update column
         $this->row[$column] = $data;
-        if(file_put_contents($this->path . '/' . $table . '/' . $row . '.json', json_encode($this->row)) === false) {
+        if(file_put_contents($this->path . '/' . $table . '/' . $row . '.json', json_encode($this->row, JSON_PRETTY_PRINT)) === false) {
             throw new \Exception('Line "' . $row . '" has not been updated');
         }
     }

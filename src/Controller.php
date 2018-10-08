@@ -8,13 +8,29 @@ class Controller {
      * PRIVATE PROPERTIES
      */
 
+    private $db;
+
     private $layout;
+
+    private $pageId;
 
     private $view;
 
     /**
      * PUBLIC METHODS
      */
+
+    /**
+     * Controller constructor.
+     * @param $db
+     * @param $pageId
+     */
+    public function __construct($db, $pageId) {
+        // Database
+        $this->db = $db;
+        // Current page id
+        $this->pageId = $pageId;
+    }
 
     public function getLayout() {
         return $this->layout;
