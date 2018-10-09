@@ -15,17 +15,15 @@
 <nav class="navbar">
     <div class="navbar__inner">
         <ul class="navbar__nav">
-            <li class="navbar__item">
-                <a class="navbar__link" href="">
-                    Simple
-                </a>
-            </li><li class="navbar__item">
-                <a class="navbar__link navbar__link--active" href="">
-                    Active
-                </a>
-            </li>
+            <?php foreach($this->db->select('nav', 'navbar') as $pageId): ?>
+                <li class="navbar__item">
+                    <a class="navbar__link <?php if($this->pageId === $pageId): ?>navbar__link--active<?php endif; ?>" href="?pageId=<?php echo $pageId; ?>">
+                        <?php echo $this->db->select('page', $pageId, 'title'); ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
         </ul>
-        <a class="navbar__title" href="">
+        <a class="navbar__title" href="./">
             <?php echo $this->db->select('setting', 'general', 'title'); ?>
         </a>
     </div>

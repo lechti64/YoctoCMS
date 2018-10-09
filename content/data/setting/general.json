@@ -1,5 +1,5 @@
 {
-  "title": "My Yocto site !",
-  "description": "My Yocto site description.",
-  "defaultPageId": "test"
+  "title": "My Yocto!",
+  "description": "My Yocto description.",
+  "defaultPageId": "index"
 }
