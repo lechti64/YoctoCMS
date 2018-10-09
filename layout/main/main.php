@@ -12,21 +12,20 @@
     <script src="layout/main/main.js"></script>
 </head>
 <body class="body">
-<nav class="nav">
-    <div class="nav__inner">
-        <ul class="nav__side nav__side--right">
-            <li class="nav__item">
-                <a class="nav__link" href="">
+<nav class="navbar">
+    <div class="navbar__inner">
+        <ul class="navbar__nav">
+            <li class="navbar__item">
+                <a class="navbar__link" href="">
                     Simple
                 </a>
-            </li>
-            <li class="nav__item">
-                <a class="nav__link nav__link--active" href="">
+            </li><li class="navbar__item">
+                <a class="navbar__link navbar__link--active" href="">
                     Active
                 </a>
             </li>
         </ul>
-        <a class="nav__side nav__side--left" href="">
+        <a class="navbar__title" href="">
             <?php echo $this->db->select('setting', 'general', 'title'); ?>
         </a>
     </div>
@@ -43,7 +42,7 @@
 </section>
 <footer class="footer">
     <div class="footer__inner">
-        Powered by <a href="https://yoctocms.com" target="_blank">Yocto</a>.
+        Powered by <a class="footer__yocto" href="https://yoctocms.com" target="_blank">Yocto</a>.
     </div>
 </footer>
 </body>

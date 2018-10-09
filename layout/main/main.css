@@ -4,59 +4,66 @@
     font-weight: 300;
     color: #444;
 }
-.nav {
+.navbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    transition: background-color .2s linear, color .2s linear;
+    transition: background-color .2s linear;
     background-color: rgba(1, 1, 1, .1);
 }
-.nav--fixed {
+.navbar--fixed {
     background-color: rgba(255, 255, 255, .9);
 }
-.nav--fixed .nav__side--left,
-.nav--fixed .nav__link {
+.navbar--fixed .navbar__title,
+.navbar--fixed .navbar__link {
     color: #444;
 }
-.nav__inner {
-    margin: auto;
-    max-width: 1170px;
+.navbar--fixed .navbar__link:hover,
+.navbar--fixed .navbar__link--active {
+    border-color: #444;
 }
-.nav__inner::after {
+.navbar__inner {
+    margin: auto;
+    padding: 0 15px;
+    max-width: 1140px;
+}
+.navbar__inner::after {
     content: " ";
     display: table;
     clear: both;
 }
-.nav__side {
-}
-.nav__side--left {
-    float: left;
-    padding: 19px 15px;
-    font-weight: 700;
-    font-size: 18px;
-    display: block;
-    color: #fff;
-    text-decoration: none;
-}
-.nav__side--right {
+.navbar__nav {
     float: right;
     padding: 0;
     margin: 0;
     letter-spacing: 1px;
 }
-.nav__item {
+.navbar__item {
     display: inline-block;
     list-style: none;
 }
-.nav__link {
+.navbar__link {
     display: inline-block;
-    padding: 20px 15px;
+    padding: 20px;
     color: #fff;
     text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color .2s linear, color .2s linear;
 }
-.nav__link--active {
-    border-bottom: 2px solid rgba(255, 255, 255, .8);
+.navbar__link:hover,
+.navbar__link--active {
+    border-color: rgba(255, 255, 255, .8);
+}
+.navbar__title {
+    float: left;
+    padding: 19px 0;
+    font-weight: 700;
+    font-size: 18px;
+    display: block;
+    color: #fff;
+    text-decoration: none;
+    transition: border-color .2s linear, color .2s linear;
 }
 .header {
     background-color: #ffa463;
@@ -68,10 +75,15 @@
     font-size: 40px;
     font-family: "Montserrat", sans-serif;
     font-weight: 100;
-    text-shadow: 2px 0 0 rgba(246, 107, 64, .8);
+    text-shadow: 2px 0 0 rgba(0, 0, 0, .2);
 }
 .section {
-
+}
+.section a {
+    color: #444;
+}
+.section a:hover {
+    text-decoration: none;
 }
 .section__inner {
     margin: auto;
@@ -79,11 +91,18 @@
     padding: 40px 15px;
 }
 .footer {
+    border-top: 1px solid #efefef;
+}
+.footer a {
+    color: #444;
+}
+.footer a:hover {
+    text-decoration: none;
 }
 .footer__inner {
     font-size: 14px;
     margin: auto;
     max-width: 1140px;
-    padding: 40px 15px;
+    padding: 50px 15px;
     text-align: center;
 }
