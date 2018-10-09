@@ -21,9 +21,9 @@ class Init {
      * @param $pageId
      * @throws \Exception
      */
-    public function __construct($pageId) {
+    public function __construct($pageId, $db) {
         // Database
-        $this->db = new Database();
+        $this->db = $db;
         // Current page id
         $this->pageId = $pageId;
         // Router

@@ -1,6 +1,6 @@
 <?php
 
-$router = new Yocto\Router($_GET['action']);
+$router = new Yocto\Router(Yocto\Input::get('action'));
 $router->map('GET', '/', function() {
     $controller = new Yocto\ControllerStatic($this->db, $this->pageId);
     $controller->index();
