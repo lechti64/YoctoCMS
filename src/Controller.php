@@ -14,6 +14,10 @@ class Controller {
 
     private $pageId;
 
+    private $vendors = [
+        'ckeditor' => false
+    ];
+
     private $view;
 
     /**
@@ -54,6 +58,13 @@ class Controller {
      */
     public function setLayout($layout) {
         $this->layout = $layout;
+    }
+
+    /**
+     * @param $vendor
+     */
+    public function setVendor($vendor) {
+        $this->vendors[$vendor] = true;
     }
 
     /**

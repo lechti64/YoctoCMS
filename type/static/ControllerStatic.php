@@ -9,6 +9,7 @@ class ControllerStatic extends Controller {
      */
 
     public function edit() {
+        $this->setVendor('ckeditor');
         $this->setView('edit');
         $this->setLayout('main');
     }
