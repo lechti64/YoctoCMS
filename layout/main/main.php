@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="vendor/normalize/normalize.min.css">
     <link rel="stylesheet" href="layout/main/main.css">
     <script src="vendor/jquery/jquery.min.js"></script>
+    <?php if($this->vendors['ckeditor']): ?>
+        <script src="vendor/ckeditor/ckeditor.min.js"></script>
+    <?php endif; ?>
     <script src="layout/main/main.js"></script>
 </head>
 <body class="body">
@@ -22,6 +25,28 @@
                     </a>
                 </li>
             <?php endforeach; ?>
+            <li class="navbar__item">
+                <a class="navbar__link" href="#">Administration</a>
+                <nav class="navbar__sub-navbar">
+                    <ul class="navbar__sub-nav">
+                        <li class="navbar__item">
+                            <a class="navbar__link" href="?pageId=configuration">Configuration</a>
+                        </li>
+                        <li class="navbar__item">
+                            <a class="navbar__link" href="?pageId=theme">Theme</a>
+                        </li>
+                        <li class="navbar__item">
+                            <a class="navbar__link" href="?pageId=pages">Pages</a>
+                        </li>
+                        <li class="navbar__item">
+                            <a class="navbar__link" href="?pageId=<?php echo $this->pageId; ?>&action=edit">Edit page</a>
+                        </li>
+                        <li class="navbar__item">
+                            <a class="navbar__link" href="?pageId=logout">Logout</a>
+                        </li>
+                    </ul>
+                </nav>
+            </li>
         </ul>
         <a class="navbar__title" href="./">
             <?php echo $this->db->select('setting', 'general', 'title'); ?>
