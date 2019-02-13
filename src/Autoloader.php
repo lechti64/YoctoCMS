@@ -5,29 +5,29 @@ namespace Yocto;
 class Autoloader {
 
     /**
-     * PUBLIC METHODS
+     * METHODES PUBLIQUES
      */
 
     /**
-     * Autoload registration
+     * Enregistre la fonction d'autoload
      */
     public static function register() {
         spl_autoload_register([__CLASS__, 'autoload']);
     }
 
     /**
-     * Included the class file
-     * @param string $class Class name
+     * Fonction d'autoload
+     * @param string $class Nom de la classe
      */
     public static function autoload($class) {
-        // Delete the namespace
+        // Supprime le namespace
         $class = str_replace('Yocto\\', '', $class);
-        // Included the class file
-        // Yocto class
+        // Importe le fichier de la classe
+        // Cas : classe de Yocto
         if(is_file(ROOT . '/src/' . $class . '.php')) {
             require ROOT . '/src/' . $class . '.php';
         }
-        // Controller class
+        // Cas : classe d'un contrôleur
         else {
             $directoryName = strtolower(str_replace('Controller', '', $class));
             if(is_file(ROOT . '/type/' . $directoryName . '/' . $class . '.php')) {

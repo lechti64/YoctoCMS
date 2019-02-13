@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,700|Montserrat:100">
     <link rel="stylesheet" href="vendor/normalize/normalize.min.css">
+    <link rel="stylesheet" href="layout/common/common.css">
     <link rel="stylesheet" href="layout/main/main.css">
     <script src="vendor/jquery/jquery.min.js"></script>
     <?php if($this->vendors['ckeditor']): ?>

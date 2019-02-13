@@ -5,26 +5,26 @@ namespace Yocto;
 class Route {
 
     /**
-     * PRIVATE PROPERTIES
+     * PROPRIÉTÉS PRIVÉES
      */
 
-    /** @var callable Callback function */
+    /** @var callable Fonction de callback */
     private $callback;
 
-    /** @var array List of matches */
+    /** @var array Liste des correspondances */
     private $matches = [];
 
-    /** @var string Routing path */
+    /** @var string Chemin de la route */
     private $path;
 
     /**
-     * PUBLIC METHODS
+     * MÉTHODES PUBLIQUES
      */
 
     /**
-     * Route constructor
-     * @param string $path Routing path
-     * @param callable $callback Callback function
+     * Constructeur de la classe
+     * @param string $path Chemin de la route
+     * @param callable $callback Fonction de callback
      */
     public function __construct($path, $callback) {
         $this->path = trim($path, '/');
@@ -32,7 +32,7 @@ class Route {
     }
 
     /**
-     * Call callback
+     * Appel du callback
      * @return mixed
      */
     public function call() {
@@ -40,15 +40,24 @@ class Route {
     }
 
     /**
-     * Route matching
+     * Cherche des correspondances
      * @param string $url Url
      * @return bool
      * @throws \Exception
      */
     public function match($url) {
-        // Creating regex based on types
-        $regex = preg_replace_callback('/\[([a-z]+)\:([a-z]+)\]/i', [$this, 'matchCallback'], $this->path);
-        // Search values in url
+        // Crée une regex basée sur les types
+        $regex = preg_replace_callback('/\[([a-z]+)\:([a-z]+)\]/i', function($matches) {
+            switch($matches[1]) {
+                case 'int':
+                    return '([0-9]+)';
+                case 'str':
+                    return '([a-z-]+)';
+                default:
+                    throw new \Exception('Filter "' . $matches[1] . '" is not defined');
+            }
+        }, $this->path);
+        // Cherche des correspondances
         if(preg_match('/^' . $regex . '$/i', $url, $matches) > 0) {
             array_shift($matches);
             $this->matches = $matches;
@@ -56,27 +65,6 @@ class Route {
         }
         else {
             return false;
-        }
-    }
-
-    /**
-     * PRIVATE METHODS
-     */
-
-    /**
-     * Route matching callback
-     * @param $matches
-     * @return string
-     * @throws \Exception
-     */
-    private function matchCallback($matches) {
-        switch($matches[1]) {
-            case 'int':
-                return '([0-9]+)';
-            case 'str':
-                return '([a-z-]+)';
-            default:
-                throw new \Exception('Filter "' . $matches[1] . '" is not defined');
         }
     }
 

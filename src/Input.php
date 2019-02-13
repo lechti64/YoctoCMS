@@ -5,11 +5,12 @@ namespace Yocto;
 class Input {
 
     /**
-     * PUBLIC METHODS
+     * MÉTHODES PUBLIQUES
      */
 
     /**
      * @param $key
+     * @param $method
      * @return string
      */
     public static function get($key) {

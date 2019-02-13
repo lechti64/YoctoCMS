@@ -5,10 +5,10 @@ namespace Yocto;
 class Router {
 
     /**
-     * PRIVATE PROPERTIES
+     * PROPRIÉTÉS PRIVÉES
      */
 
-    /** @var Route[][] List of routes */
+    /** @var Route[][] Liste des routes */
     private $routes = [
         'GET' => [],
         'POST' => []
@@ -18,11 +18,11 @@ class Router {
     private $url;
 
     /**
-     * PUBLIC METHODS
+     * MÉTHODES PUBLIQUES
      */
 
     /**
-     * Router constructor
+     * Constructeur de la classe
      * @param string $url Url
      */
     public function __construct($url) {
@@ -30,39 +30,39 @@ class Router {
     }
 
     /**
-     * Route mapping
-     * @param string $method HTTP method
-     * @param string $path Routing path
-     * @param callable $callback Callback function
+     * Crée une route
+     * @param string $method Méthode HTTP
+     * @param string $path Chemin de la route
+     * @param callable $callback Fonction de callback
      * @throws \Exception
      */
     public function map($method, $path, $callback) {
-        // Method does not exist
+        // Méthode introuvable
         if(isset($this->routes[$method]) === false) {
             throw new \Exception('Method "' . $method . '" does not exist');
         }
-        // Create route
+        // Crée la route
         $route = new Route($path, $callback);
-        // Add route in routes array
+        // Ajout de la route à la propriété $this->routes
         $this->routes[$method][] = $route;
     }
 
     /**
-     * Run routing
+     * Exécute le routeur
      * @throws \Exception
      */
     public function run() {
-        // Method does not exist
+        // Méthode introuvable
         if(isset($this->routes[$_SERVER['REQUEST_METHOD']]) === false) {
             throw new \Exception('Method "' . $_SERVER['REQUEST_METHOD'] . '" does not exist');
         }
-        // Search route in routes array
+        // Cherche la route dans la propriété $this->routes
         foreach($this->routes[$_SERVER['REQUEST_METHOD']] as $route) {
             if($route->match($this->url)) {
                 return $route->call();
             }
         }
-        // Route not found
+        // Route introuvable
         throw new \Exception('Route not found');
     }
 

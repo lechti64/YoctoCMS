@@ -5,7 +5,7 @@ namespace Yocto;
 class ControllerStatic extends Controller {
 
     /**
-     * PUBLIC METHODS
+     * MÉTHODES PUBLIQUES
      */
 
     public function edit() {
