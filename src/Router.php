@@ -31,20 +31,24 @@ class Router {
 
     /**
      * Crée une route
-     * @param string $method Méthode HTTP
+     * @param string $methods Méthodes HTTP, utiliser une barre verticale comme séparateur
      * @param string $path Chemin de la route
      * @param callable $callback Fonction de callback
      * @throws \Exception
      */
-    public function map($method, $path, $callback) {
-        // Méthode introuvable
-        if(isset($this->routes[$method]) === false) {
-            throw new \Exception('Method "' . $method . '" does not exist');
+    public function map($methods, $path, $callback) {
+        // Extrait les méthodes
+        $methods = explode('|', $methods);
+        foreach ($methods as $method) {
+            // Méthode introuvable
+            if (isset($this->routes[$method]) === false) {
+                throw new \Exception('Method "' . $method . '" does not exist');
+            }
+            // Crée la route
+            $route = new Route($path, $callback);
+            // Ajout de la route à la propriété $this->routes
+            $this->routes[$method][] = $route;
         }
-        // Crée la route
-        $route = new Route($path, $callback);
-        // Ajout de la route à la propriété $this->routes
-        $this->routes[$method][] = $route;
     }
 
     /**
@@ -53,12 +57,12 @@ class Router {
      */
     public function run() {
         // Méthode introuvable
-        if(isset($this->routes[$_SERVER['REQUEST_METHOD']]) === false) {
+        if (isset($this->routes[$_SERVER['REQUEST_METHOD']]) === false) {
             throw new \Exception('Method "' . $_SERVER['REQUEST_METHOD'] . '" does not exist');
         }
-        // Cherche la route dans la propriété $this->routes
-        foreach($this->routes[$_SERVER['REQUEST_METHOD']] as $route) {
-            if($route->match($this->url)) {
+        // Recherche la route dans la propriété $this->routes
+        foreach ($this->routes[$_SERVER['REQUEST_METHOD']] as $route) {
+            if ($route->match($this->url)) {
                 return $route->call();
             }
         }

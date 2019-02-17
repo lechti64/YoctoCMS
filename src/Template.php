@@ -27,8 +27,8 @@ class Template {
             'label',
         ], $exclude);
         $attributes = [];
-        foreach($array as $key => $value) {
-            if(in_array($key, $exclude) === false) {
+        foreach ($array as $key => $value) {
+            if (in_array($key, $exclude) === false) {
                 $attributes[] = sprintf('%s="%s"', $key, $value);
             }
         }
@@ -64,16 +64,16 @@ class Template {
         ], $attributes);
         $attributes['class'] .= ' form-element__input';
         // Restore la valeur lors d'une erreur de soumission
-        if($value = $this->controller->get('POST:' . $nameId)) {
+        if ($value = $this->controller->get('POST:' . $nameId)) {
             $attributes['value'] = $value;
         }
         // Ajoute le label
         $html = '';
-        if($attributes['label']) {
+        if ($attributes['label']) {
             $html .= $this->label($attributes['id'], $attributes['label']);
         }
         // Ajoute la notice
-        if(isset($this->controller->notices[$attributes['id']])) {
+        if (isset($this->controller->notices[$attributes['id']])) {
             $attributes['class'] .= ' form-element--notice';
             $html .= $this->notice($attributes['id'], $this->controller->notices[$attributes['id']]);
         }
@@ -143,6 +143,7 @@ class Template {
             'id' => $nameId,
             'name' => $nameId,
         ], $attributes);
+        $attributes['class'] .= ' form-element__submit';
         // Retourne l'élément
         return sprintf(
             '<button type="submit" %s>%s</button>',

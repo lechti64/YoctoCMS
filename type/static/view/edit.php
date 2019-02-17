@@ -1,7 +1,7 @@
-<div class="ckeditor"><?php echo $this->db->select('page', $this->pageId, 'content'); ?></div>
+<div class="ckeditor"><?php echo $this->_page->content; ?></div>
 <?php echo $this->template->input('title', [
     'label' => 'Title',
-    'value' => $this->db->select('page', $this->pageId, 'title'),
+    'value' => $this->_page->title,
 ]); ?>
 <script>
     BalloonEditor

@@ -1,1 +1,1 @@
-<?php echo $this->db->select('page', $this->pageId, 'content'); ?>
+<?php echo $this->_page->content; ?>

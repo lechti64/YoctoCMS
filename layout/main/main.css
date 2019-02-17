@@ -4,7 +4,7 @@
     font-weight: 300;
     color: #444;
 }
-.navbar {
+.navigation {
     position: fixed;
     top: 0;
     left: 0;
@@ -12,48 +12,48 @@
     transition: background-color .2s linear;
     background-color: rgba(1, 1, 1, .06);
 }
-.navbar--fixed {
+.navigation--fixed {
     background-color: rgba(255, 255, 255, .9);
 }
-.navbar--fixed .navbar__sub-navbar {
+.navigation--fixed .navigation__sub-navigation {
     background-color: rgba(245, 245, 245, .9);
 }
-.navbar--fixed .navbar__title,
-.navbar--fixed .navbar__link {
+.navigation--fixed .navigation__title,
+.navigation--fixed .navigation__link {
     color: #444;
 }
-.navbar--fixed .navbar__item:hover > .navbar__link,
-.navbar--fixed .navbar__link--active {
+.navigation--fixed .navigation__item:hover > .navigation__link,
+.navigation--fixed .navigation__link--active {
     border-color: #444;
 }
-.navbar__inner {
+.navigation__inner {
     margin: auto;
     padding: 0 15px;
     max-width: 1140px;
 }
-.navbar__inner::after {
+.navigation__inner::after {
     content: " ";
     display: table;
     clear: both;
 }
-.navbar__nav {
+.navigation__nav {
     float: right;
     padding: 0;
     margin: 0;
     font-size: 0;
 }
-.navbar__nav:hover .navbar__link--active {
+.navigation__nav:hover .navigation__link--active {
     border-color: transparent;
 }
-.navbar__item {
+.navigation__item {
     display: inline-block;
     list-style: none;
 }
-.navbar__item:hover .navbar__sub-navbar {
+.navigation__item:hover .navigation__sub-navigation {
     visibility: visible;
     opacity: 1;
 }
-.navbar__link {
+.navigation__link {
     display: inline-block;
     padding: 20px 15px;
     color: #fff;
@@ -62,11 +62,11 @@
     transition: border-color .2s linear, color .2s linear;
     font-size: 16px;
 }
-.navbar__item:hover > .navbar__link,
-.navbar__link--active {
+.navigation__item:hover > .navigation__link,
+.navigation__link--active {
     border-color: rgba(255, 255, 255, .8);
 }
-.navbar__sub-navbar {
+.navigation__sub-navigation {
     visibility: hidden;
     opacity: 0;
     position: absolute;
@@ -78,12 +78,12 @@
     background-color: rgba(1, 1, 1, .08);
     text-align: right;
 }
-.navbar__sub-nav {
+.navigation__sub-nav {
     margin: auto;
     padding: 0 15px;
     max-width: 1140px;
 }
-.navbar__title {
+.navigation__title {
     float: left;
     padding: 19px 0;
     font-weight: 700;

@@ -8,37 +8,34 @@ class Controller {
      * PROPRIÉTÉS PUBLIQUES
      */
 
-    /** @var Database */
-    public $db;
+    /** @var \stdClass Page courante */
+    public $_page;
 
-    /** @var array */
+    /** @var \stdClass Utilisateur courant */
+    public $_user;
+
+    /** @var array Notices */
     public $notices = [];
 
     /**
      * PROPRIÉTÉS PRIVÉES
      */
 
-    /** @var string */
+    /** @var string Layout */
     private $layout;
 
-    /** @var array */
+    /** @var array Méthodes HTTP */
     private $methods = [];
 
-    /** @var string */
-    private $pageId;
-
-    /** @var Template */
+    /** @var Template Template */
     private $template;
 
-    /** @var int */
-    private $userId;
-
-    /** @var array */
+    /** @var array Librairies */
     private $vendors = [
         'ckeditor' => false
     ];
 
-    /** @var string */
+    /** @var string Vue */
     private $view;
 
     /**
@@ -47,20 +44,14 @@ class Controller {
 
     /**
      * Constructeur de la classe
-     * @param $db Database
-     * @param $pageId string
+     * @param \stdClass $_page
+     * @param \stdClass $_user
+     * @throws \Exception
      */
-    public function __construct($db, $pageId, $userId) {
-        // Transmet au contrôleur de la page les données suivantes en provenance de ./index.php :
-        // - l'instance de la base de données
-        $this->db = $db;
-        // - l'id de la page courante
-        $this->pageId = $pageId;
-        // - l'id de l'utilisateur courant
-        $this->userId = $userId;
-        // Crée une instance du template
+    public function __construct($_page, $_user) {
+        $this->_page = $_page;
+        $this->_user = $_user;
         $this->template = new Template($this);
-        // Liste des méthodes
         $this->methods = [
             'POST' => $_POST,
             'GET' => $_GET,
@@ -76,22 +67,22 @@ class Controller {
      */
     public function get($key, $required = false) {
         // Une méthode spécifique est demandée
-        if(strpos($key, ':') !== false) {
+        if (strpos($key, ':') !== false) {
             list($method, $key) = explode(':', $key);
-            if(empty($this->methods[$method][$key]) === false) {
+            if (empty($this->methods[$method][$key]) === false) {
                 return $this->methods[$method][$key];
             }
         }
         // Recherche dans les méthodes
         else {
-            foreach($this->methods as $method) {
-                if(empty($method[$key]) === false) {
+            foreach ($this->methods as $method) {
+                if (empty($method[$key]) === false) {
                     return $method[$key];
                 }
             }
         }
         // Génère une notice
-        if($required) {
+        if ($required) {
             $this->notices[$key] = 'Obligatoire';
         }
         // Clé introuvable
@@ -114,6 +105,7 @@ class Controller {
     }
 
     /**
+     * Configure un layout
      * @param $layout
      */
     public function setLayout($layout) {
@@ -121,6 +113,7 @@ class Controller {
     }
 
     /**
+     * Configure les librairies
      * @param $vendor
      */
     public function setVendor($vendor) {
@@ -128,6 +121,7 @@ class Controller {
     }
 
     /**
+     * Configure la vue
      * @param $view
      */
     public function setView($view) {

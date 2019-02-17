@@ -24,13 +24,13 @@ class Autoloader {
         $class = str_replace('Yocto\\', '', $class);
         // Importe le fichier de la classe
         // Cas : classe de Yocto
-        if(is_file(ROOT . '/src/' . $class . '.php')) {
+        if (is_file(ROOT . '/src/' . $class . '.php')) {
             require ROOT . '/src/' . $class . '.php';
         }
         // Cas : classe d'un contrôleur
         else {
             $directoryName = strtolower(str_replace('Controller', '', $class));
-            if(is_file(ROOT . '/type/' . $directoryName . '/' . $class . '.php')) {
+            if (is_file(ROOT . '/type/' . $directoryName . '/' . $class . '.php')) {
                 require ROOT . '/type/' . $directoryName . '/' . $class . '.php';
             }
         }

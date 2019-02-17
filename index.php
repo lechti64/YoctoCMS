@@ -9,30 +9,25 @@ session_start();
 require ROOT . '/src/Autoloader.php';
 Yocto\Autoloader::register();
 
-// Crée une instance de la base de données
-$db = new Yocto\Database();
+// Récupère l'utilisateur courant
+$_userId = (isset($_COOKIE['userId'])
+    ? $_COOKIE['userId']
+    : ''
+);
+$_user = Yocto\Database::instance('user')->where('id', '=', $_userId)->find();
 
-// Récupère l'id de l'utilisateur courant
-$userId = isset($_COOKIE['userId']) ? $_COOKIE['userId'] : '';
+// Récupère la page courante
+$_pageId = (empty($_GET['pageId'])
+    ? Yocto\Database::instance('setting')->where('id', '=', 'general')->find()->defaultPageId
+    : $_GET['pageId']
+);
+$_page = Yocto\Database::instance('page')->where('id', '=', $_pageId)->find();
 
-// Récupère l'id de la page courante
-if(empty($_GET['pageId'])) {
-    $pageId = $db->select('setting', 'general', 'defaultPageId');
-}
-else {
-    $pageId = $_GET['pageId'];
-}
-
-// Importe le routeur du type rattaché à la page courante
-$router = new Yocto\Router($pageId);
-$router->map('GET', '/[str:pageId]', function() use ($db, $pageId, $userId) {
+// Importe le routeur du type de la page courante
+$router = new Yocto\Router($_page->id);
+$router->map('GET|POST', '/[str:pageId]', function() use ($_page, $_user) {
     /** @var Yocto\Controller $controller */
-    $controller = require ROOT . '/type/' . $db->select('page', $pageId, 'type') . '/router.php';
-    $controller->loadLayout();
-});
-$router->map('POST', '/[str:pageId]', function() use ($db, $pageId, $userId) {
-    /** @var Yocto\Controller $controller */
-    $controller = require ROOT . '/type/' . $db->select('page', $pageId, 'type') . '/router.php';
+    $controller = require ROOT . '/type/' . $_page->type . '/router.php';
     $controller->loadLayout();
 });
 $router->run();

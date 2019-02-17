@@ -40,7 +40,7 @@ class Route {
     }
 
     /**
-     * Cherche des correspondances
+     * Recherche des correspondances
      * @param string $url Url
      * @return bool
      * @throws \Exception
@@ -57,8 +57,8 @@ class Route {
                     throw new \Exception('Filter "' . $matches[1] . '" is not defined');
             }
         }, $this->path);
-        // Cherche des correspondances
-        if(preg_match('/^' . $regex . '$/i', $url, $matches) > 0) {
+        // Recherche des correspondances
+        if (preg_match('/^' . $regex . '$/i', $url, $matches) > 0) {
             array_shift($matches);
             $this->matches = $matches;
             return true;

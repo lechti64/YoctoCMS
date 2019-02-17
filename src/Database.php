@@ -2,149 +2,297 @@
 
 namespace Yocto;
 
-class Database {
+class Database implements \IteratorAggregate, \Countable {
 
     /**
      * PROPRIÉTÉS PRIVÉES
      */
 
-    /** @var string Chemin vers la base de données */
-    private $path = ROOT . '/content/data';
+    /** @var array Conditions applicables lors d'une requête */
+    private $conditions = [
+        'limit'   => [],
+        'orderBy' => [],
+        'where'   => [],
+    ];
 
-    /** @var array Ligne courante */
-    private $row = [];
+    /** @var array Lignes en sortie */
+    private $outputRows = [];
+
+    /** @var array Lignes de la table */
+    private $tableRows = [];
+
+    /**
+     * METHODES PRIVÉES
+     */
+
+    /**
+     * Applique les conditions
+     * @return array
+     * @throws \Exception
+     */
+    private function applyConditions() {
+        $outputRows = $this->outputRows;
+        if ($this->conditions['where']) {
+            $outputRows = $this->applyWhere($outputRows);
+        }
+        if ($this->conditions['orderBy']) {
+            $this->applyOrderBy($outputRows);
+        }
+        if ($this->conditions['limit']) {;
+            $outputRows = $this->applyLimit($outputRows);
+        }
+        return array_values($outputRows);
+    }
+
+    /**
+     * Applique la condition limit
+     * @param array $outputRows Lignes en sortie à traiter
+     * @return array
+     */
+    private function applyLimit($outputRows) {
+        return array_slice(
+            $outputRows,
+            $this->conditions['limit']['offset'],
+            $this->conditions['limit']['length']
+        );
+    }
+
+    /**
+     * Applique la condition orderBy
+     * @param array $outputRows Lignes en sortie à traiter
+     */
+    private function applyOrderBy(&$outputRows) {
+        uasort($outputRows, function($a, $b) {
+            if ($this->conditions['orderBy']['direction'] === 'ASC') {
+                return strnatcasecmp(
+                    $a->{$this->conditions['orderBy']['column']},
+                    $b->{$this->conditions['orderBy']['column']}
+                );
+            }
+            else if ($this->conditions['orderBy']['direction'] === 'DESC') {
+                return strnatcasecmp(
+                    $b->{$this->conditions['orderBy']['column']},
+                    $a->{$this->conditions['orderBy']['column']}
+                );
+            }
+            else {
+                throw new \Exception('Direction "'. $this->conditions['orderBy'] . '" unknown');
+            }
+        });
+    }
+
+    /**
+     * Applique la condition where
+     * @param array $outputRows Lignes en sortie à traiter
+     * @return array
+     */
+    private function applyWhere($outputRows) {
+        return array_filter($outputRows, function($row) {
+            $isFound = [
+                'AND' => null,
+                'OR' => null,
+            ];
+            foreach ($this->conditions['where'] as $condition) {
+                // Stop la recherche si une condition OR = true
+                if ($isFound['OR']) {
+                    break;
+                }
+                // Ignore les conditions AND lorsqu'une condition AND = false
+                if ($condition['logicalOperator'] === 'AND' AND $isFound['AND'] === false) {
+                    continue;
+                }
+                // Check le contenu des colonnes
+                switch($condition['comparisonOperators']) {
+                    case '=':
+                        $isFound[$condition['logicalOperator']] = ($row->{$condition['column']} === $condition['value']);
+                        break;
+                    case '!=':
+                        $isFound[$condition['logicalOperator']] = ($row->{$condition['column']} !== $condition['value']);
+                        break;
+                    case '>':
+                        $isFound[$condition['logicalOperator']] = ($row->{$condition['column']} > $condition['value']);
+                        break;
+                    case '>=':
+                        $isFound[$condition['logicalOperator']] = ($row->{$condition['column']} >= $condition['value']);
+                        break;
+                    case '<':
+                        $isFound[$condition['logicalOperator']] = ($row->{$condition['column']} < $condition['value']);
+                        break;
+                    case '<=':
+                        $isFound[$condition['logicalOperator']] = ($row->{$condition['column']} <= $condition['value']);
+                        break;
+                    case 'IN':
+                        $isFound[$condition['logicalOperator']] = in_array($row->{$condition['column']}, $condition['value']);
+                        break;
+                    case 'NOT IN':
+                        $isFound[$condition['logicalOperator']] = (in_array($row->{$condition['column']}, $condition['value']) === false);
+                        break;
+                    case 'LIKE':
+                        $isFound[$condition['logicalOperator']] = preg_match(
+                            '/^' . str_replace('%', '(.*?)', preg_quote($condition['value'])) . '$/i',
+                            $row->{$condition['column']}
+                        );
+                        break;
+                    default:
+                        throw new \Exception('Logical operator "'. $condition['logicalOperator'] . '" unknown');
+                }
+            }
+            return ($isFound['OR'] OR $isFound['AND']);
+        });
+    }
 
     /**
      * MÉTHODES PUBLIQUES
      */
 
     /**
-     * Supprime une table, ligne ou colonne
-     * @param string $table Table
-     * @param null|string $row Ligne
-     * @param null|string $column Colonne
-     * @throws \Exception
+     * Retourne la valeur d'une colonne lorsque la méthode find est utilisée
+     * @param string $column Nom de la colonne
+     * @return mixed
      */
-    public function delete($table, $row = null, $column = null) {
-        // Check les arguments et ajoute des lignes dans la propriété $this->row
-        $this->check($table, $row, $column);
-        // Supprime la colonne
-        if($column) {
-            unset($this->row[$column]);
-        }
-        else {
-            // Supprime la ligne
-            if($row) {
-                if(unlink($this->path . '/' . $table . '/' . $row . '.json') === false) {
-                    throw new \Exception('Row "' . $row . '" has not been deleted');
-                }
-            }
-            // Supprime la table
-            else {
-                if(empty(array_map('unlink', glob($this->path . '/' . $table . '/*.json'))) === false) {
-                    throw new \Exception('Rows have not been deleted in the table "' . $table . '"');
-                }
-                if(rmdir($this->path . '/' . $table) === false) {
-                    throw new \Exception('Table "' . $table . '" has not been deleted');
-                }
-            }
-        }
+    public function __get($column) {
+        return $this->outputRows->$column;
     }
 
     /**
-     * Insert une ligne
-     * @param string $table Table
-     * @param string $row Ligne
-     * @param array $data Données de la ligne
-     * @throws \Exception
+     * Alias de la méthode where
+     * @param string $column Nom de la colonne
+     * @param string $comparisonOperators Opérateur de comparaison (=, !=, >, >=, <, <=, IN, NOT IN, LIKE)
+     * @param string $value Valeur de la colonne
+     * @return $this
      */
-    public function insert($table, $row, $data) {
-        // Crée la table
-        if(is_dir($table) === false AND mkdir($this->path . '/' . $table) === false) {
-            throw new \Exception('Table "' . $table . '" was not created');
-        }
-        // Insert la ligne
-        if(file_put_contents($this->path . '/' . $table . '/' . $row . '.json', json_encode($data, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Row "' . $row . '" was not inserted');
-        }
+    public function andWhere($column, $comparisonOperators, $value) {
+        $this->where($column, $comparisonOperators, $value);
+        return $this;
     }
 
     /**
-     * Sélectionne une table, ligne ou colonne
-     * @param string $table Table
-     * @param null|string $column Colonne
-     * @param null|string $row Ligne
-     * @return string|array
-     * @throws \Exception
+     * Compte le nombre de lignes en sortie
+     * @return int
      */
-    public function select($table, $row = null, $column = null) {
-        // Check les arguments et ajoute des lignes dans la propriété $this->row
-        $this->check($table, $row, $column);
-        // Sélectionne la colonne
-        if($column) {
-            return $this->row[$column];
-        }
-        // Sélectionne la ligne
-        if($row) {
-            return $this->row;
-        }
-        // Sélectionne la table
-        $rows = [];
-        foreach(new \DirectoryIterator($this->path . '/' . $table) as $item) {
-            if($item->getExtension() === '.json') {
-                $data[$item->getBasename('.json')] = file_get_contents($this->path . '/' . $table . '/' . $item->getFilename());
-            }
-        }
-        return $rows;
+    public function count() {
+        return count($this->outputRows);
     }
 
     /**
-     * Met à jour une colonne
-     * @param string $table Table
-     * @param string $row Ligne
-     * @param string $column Colonne
-     * @param array $data Données de la colonne
+     * Supprime une ligne
+     */
+    public function delete() {}
+
+    /**
+     * Retourne une ligne
+     * @return $this
      * @throws \Exception
      */
-    public function update($table, $row, $column, $data) {
-        // Check les arguments et ajoute des lignes dans la propriété $this->row
-        $this->check($table, $row, $column);
-        // Met à jour la colonne
-        $this->row[$column] = $data;
-        if(file_put_contents($this->path . '/' . $table . '/' . $row . '.json', json_encode($this->row, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Line "' . $row . '" has not been updated');
+    public function find() {
+        $this->outputRows = $this->applyConditions();
+        if ($this->count()) {
+            $this->outputRows = $this->outputRows[0];
         }
+        return $this;
     }
 
     /**
-     * MÉTHODES PRIVÉES
-     */
-
-    /**
-     * Check les arguments et ajoute des lignes dans la propriété $this->row
-     * @param string $table Table
-     * @param null|string $row Ligne
-     * @param null|string $column Colonne
+     * Retourne toutes les lignes
+     * @return $this
      * @throws \Exception
      */
-    private function check($table, $row = null, $column = null) {
-        // Table introuvable
-        if(is_dir($this->path . '/' . $table) === false) {
+    public function findAll() {
+        $this->outputRows = $this->applyConditions();
+        return $this;
+    }
+
+    /**
+     * Crée l'itérateur à partir de la propriété $this->>outputRows
+     * @return \ArrayIterator
+     */
+    public function getIterator() {
+        return new \ArrayIterator($this->outputRows);
+    }
+
+    /**
+     * Crée une instance de la table
+     * @param string $table Nom de la table
+     * @return Database
+     * @throws \Exception
+     */
+    public static function instance($table) {
+        if (is_dir(ROOT . '/content/data/' . $table) === false) {
             throw new \Exception('Table "'. $table . '" not found');
         }
-        // Ligne introuvable
-        if($row) {
-            if(is_file($this->path . '/' . $table . '/' . $row . '.json')) {
-                $this->row = json_decode(file_get_contents($this->path . '/' . $table . '/' . $row . '.json'), true);
-            }
-            else {
-                throw new \Exception('Row "'. $row . '" not found');
+        $self = new self();
+        foreach (new \DirectoryIterator(ROOT . '/content/data/' . $table) as $file) {
+            if ($file->getExtension() === 'json') {
+                $row = json_decode(file_get_contents(ROOT . '/content/data/' . $table . '/' . $file->getFilename()));
+                $row->id = $file->getBasename('.json');
+                $self->tableRows[] = $row;
             }
         }
-        // Colonne introuvable
-        if($column AND isset($this->row[$column]) === false) {
-            throw new \Exception('Column "'. $column . '" not found');
-        }
+        $self->outputRows = $self->tableRows;
+        return $self;
+    }
+
+    /**
+     * Extrait une portion des lignes
+     * @param int $offset Index de début
+     * @param int $length Nombre de lignes à extraire
+     * @return $this
+     */
+    public function limit($offset, $length) {
+        $this->conditions['limit'] = [
+            'length' => $length,
+            'offset' => $offset,
+        ];
+        return $this;
+    }
+
+    /**
+     * Tri les lignes
+     * @param string $column Colonne à utiliser pour le tri
+     * @param string $direction Ordre de tri (ASC ou DESC)
+     * @return $this
+     */
+    public function orderBy($column, $direction = 'ASC') {
+        $this->conditions['orderBy'] = [
+            'column' => $column,
+            'direction' => $direction,
+        ];
+        return $this;
+    }
+
+    /**
+     * Alias de la méthode where
+     * @param string $column Nom de la colonne
+     * @param string $comparisonOperators Opérateur de comparaison (=, !=, >, >=, <, <=, IN, NOT IN, LIKE)
+     * @param string $value Valeur de la colonne
+     * @return $this
+     */
+    public function orWhere($column, $comparisonOperators, $value) {
+        $this->where($column, $comparisonOperators, $value, 'OR');
+        return $this;
+    }
+
+    /**
+     * Enregistre la table
+     */
+    public function save() {}
+    
+    /**
+     * Ajout d'une condition sur une colonne
+     * @param string $column Nom de la colonne
+     * @param string $comparisonOperators Opérateur de comparaison (=, !=, >, >=, <, <=, IN, NOT IN, LIKE)
+     * @param string $value Valeur de la colonne
+     * @param string $logicalOperator Opérateur logique (AND ou OR)
+     * @return $this
+     */
+    public function where($column, $comparisonOperators, $value, $logicalOperator = 'AND') {
+        $this->conditions['where'][] = [
+            'column' => $column,
+            'comparisonOperators' => $comparisonOperators,
+            'logicalOperator' => $logicalOperator,
+            'value' => $value,
+        ];
+        return $this;
     }
 
 }
