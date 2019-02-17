@@ -11,7 +11,7 @@ class Router {
     /** @var Route[][] Liste des routes */
     private $routes = [
         'GET' => [],
-        'POST' => []
+        'POST' => [],
     ];
 
     /** @var string Url */

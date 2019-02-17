@@ -5,20 +5,33 @@ namespace Yocto;
 class Controller {
 
     /**
-     * PROPRIÉTÉS PRIVÉES
+     * PROPRIÉTÉS PUBLIQUES
      */
 
     /** @var Database */
-    private $db;
+    public $db;
+
+    /** @var array */
+    public $notices = [];
+
+    /**
+     * PROPRIÉTÉS PRIVÉES
+     */
 
     /** @var string */
     private $layout;
+
+    /** @var array */
+    private $methods = [];
 
     /** @var string */
     private $pageId;
 
     /** @var Template */
     private $template;
+
+    /** @var int */
+    private $userId;
 
     /** @var array */
     private $vendors = [
@@ -37,12 +50,52 @@ class Controller {
      * @param $db Database
      * @param $pageId string
      */
-    public function __construct($db, $pageId) {
-        // Transmet au contrôleur de la page l'instance de la base de données et l'id de la page courante en provenance de ./index.php
+    public function __construct($db, $pageId, $userId) {
+        // Transmet au contrôleur de la page les données suivantes en provenance de ./index.php :
+        // - l'instance de la base de données
         $this->db = $db;
+        // - l'id de la page courante
         $this->pageId = $pageId;
+        // - l'id de l'utilisateur courant
+        $this->userId = $userId;
         // Crée une instance du template
-        $this->template = new Template();
+        $this->template = new Template($this);
+        // Liste des méthodes
+        $this->methods = [
+            'POST' => $_POST,
+            'GET' => $_GET,
+            'COOKIE' => $_COOKIE,
+        ];
+    }
+
+    /**
+     * Recherche une clé dans les méthodes HTTP
+     * @param string $key Clé à rechercher
+     * @param bool $required Clé obligatoire, sinon génère une notice
+     * @return string
+     */
+    public function get($key, $required = false) {
+        // Une méthode spécifique est demandée
+        if(strpos($key, ':') !== false) {
+            list($method, $key) = explode(':', $key);
+            if(empty($this->methods[$method][$key]) === false) {
+                return $this->methods[$method][$key];
+            }
+        }
+        // Recherche dans les méthodes
+        else {
+            foreach($this->methods as $method) {
+                if(empty($method[$key]) === false) {
+                    return $method[$key];
+                }
+            }
+        }
+        // Génère une notice
+        if($required) {
+            $this->notices[$key] = 'Obligatoire';
+        }
+        // Clé introuvable
+        return "";
     }
 
     /**

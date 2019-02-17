@@ -2,24 +2,21 @@
 
 namespace Yocto;
 
-class ControllerStatic extends Controller {
+class ControllerLogin extends Controller {
 
     /**
      * MÉTHODES PUBLIQUES
      */
-
-    public function edit() {
-        $this->setVendor('ckeditor');
-        $this->setView('edit');
-        $this->setLayout('main');
-    }
 
     public function index() {
         $this->setView('index');
         $this->setLayout('main');
     }
 
-    public function save() {
+    public function login() {
+        // Test required
+        $this->get('email', true);
+        $this->get('password', true);
         $this->setView('index');
         $this->setLayout('main');
     }
