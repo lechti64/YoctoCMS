@@ -2,11 +2,14 @@
 
 namespace Yocto;
 
-class Controller {
+abstract class Controller implements ControllerInterface {
 
     /**
      * PROPRIÉTÉS PUBLIQUES
      */
+
+    /** @var Database Configuration */
+    public $_configuration;
 
     /** @var Database Page courante */
     public $_page;
@@ -34,9 +37,7 @@ class Controller {
     private $template;
 
     /** @var array Librairies */
-    private $vendors = [
-        'ckeditor' => false
-    ];
+    private $vendors = [];
 
     /** @var string Vue */
     private $view;
@@ -51,22 +52,20 @@ class Controller {
      * @param Database $_user
      * @throws \Exception
      */
-    public function __construct(Database $_page, Database $_user) {
-        // Ajoute les données du type rattaché à la page courante
-        $this->_type = Database::instance('page-' . strtolower(str_replace('Yocto\Controller', '', get_class($this))))
-            ->where('id', '=', $_page->id)
-            ->find();
-        // Transmet les données en provenance de ./index.php aux contrôleurs des types de page
+    public function __construct(Database $_configuration, Database $_page, Database $_type, Database $_user) {
+        // Transmet les données en provenance de ./index.php
+        $this->_configuration = $_configuration;
         $this->_page = $_page;
+        $this->_type = $_type;
         $this->_user = $_user;
-        // Ajout des méthodes HTTP
+        // Crée l'instance du template
+        $this->template = new Template($this);
+        // Ajoute les méthodes HTTP
         $this->methods = [
             'POST' => $_POST,
             'GET' => $_GET,
             'COOKIE' => $_COOKIE,
         ];
-        // Crée une instance du template
-        $this->template = new Template($this);
     }
 
     /**
@@ -93,10 +92,17 @@ class Controller {
         }
         // Génère une notice
         if ($required) {
-            $this->notices[$key] = 'Obligatoire';
+            $this->notices[$key] = 'Champ requis';
         }
         // Clé introuvable
         return "";
+    }
+
+    /**
+     * Accès au template
+     */
+    public function getTemplate() {
+        return $this->template;
     }
 
     /**
@@ -112,27 +118,33 @@ class Controller {
     public function loadView() {
         $class = strtolower(str_replace('Yocto\Controller', '', get_class($this)));
         require ROOT . '/type/' . $class . '/view/' . $this->view . '.php';
+        if (is_file(ROOT . '/type/' . $class . '/view/' . $this->view . '.js.php')) {
+            echo '<script>';
+            require ROOT . '/type/' . $class . '/view/' . $this->view . '.js.php';
+            echo '</script>';
+        }
     }
 
     /**
      * Configure un layout
-     * @param $layout
+     * @param string $layout Layout
      */
     public function setLayout($layout) {
         $this->layout = $layout;
     }
 
     /**
-     * Configure les librairies
-     * @param $vendor
+     * Configure une librairie
+     * @param string $url Url de la librairie
+     * @param string $sri SRI de la librairie (facultatif)
      */
-    public function setVendor($vendor) {
-        $this->vendors[$vendor] = true;
+    public function setVendor($url, $sri = '') {
+        $this->vendors[$url] = $sri;
     }
 
     /**
      * Configure la vue
-     * @param $view
+     * @param string $view Vue
      */
     public function setView($view) {
         $this->view = $view;

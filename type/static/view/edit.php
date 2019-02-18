@@ -1,12 +1,5 @@
-<div class="ckeditor"><?php echo $this->_type->content; ?></div>
-<?php echo $this->template->input('title', [
+<?php echo $this->getTemplate()->input('title', [
     'label' => 'Title',
     'value' => $this->_page->title,
 ]); ?>
-<script>
-    BalloonEditor
-        .create(document.querySelector(".ckeditor"))
-        .catch(error => {
-            console.error(error);
-        });
-</script>
+<?php echo $this->getTemplate()->textarea('title', $this->_type->content); ?>

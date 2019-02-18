@@ -8,6 +8,7 @@ Un CMS simple, rapide et moderne.
 - [Chemin d'exécution](#chemin-dexécution)
 - [Schéma de la base de données](#schéma-de-la-base-de-données)
 - [Propriétés publiques](#propriétés-publiques)
+- [Méthodes publiques](#méthodes-publiques)
 - [Base de données](#base-de-données)
 - [Template](#template-1)
 - [Type de page d'exemple](#type-de-page-dexemple)
@@ -18,8 +19,11 @@ Un CMS simple, rapide et moderne.
 
 - Ouvre une session,
 - Charge l'autoloader des classes,
+- Génère la base de données par défaut,
+- Récupère la configuration ([$_configuration](#données-de-configuration)),
 - Récupère l'utilisateur courant ([$_user](#données-de-lutilisateur-courant)),
 - Récupère la page courante ([$_page](#données-de-la-page-courante)),
+- Récupère les données du type rattaché à la page courante ([$_type](#données-du-type-rattaché-à-la-page-courante)),
 - Importe le routeur du type de la page courante.
 
 ### 2. type/[type]/router.php
@@ -29,9 +33,7 @@ Un CMS simple, rapide et moderne.
 
 ### 3. type/[type]/Controller[type].php
 
-- Récupère les données du type rattaché à la page courante ([$_type](#données-du-type-rattaché-à-la-page-courante)),
-- Récupère la classe Template ([$template](#template)),
-- Autres actions rattachées au contrôleur (ex. : définition de la vue, du layout, des librairies, enregistrement de données...).
+- Actions rattachées au contrôleur (ex. : définition de la vue, du layout, des librairies, enregistrement de données...).
 
 ### 4. type/[type]/view/[vue].php
 
@@ -39,41 +41,111 @@ Un CMS simple, rapide et moderne.
 
 ## Schéma de la base de données
 
-- `configuration` : Configuration du site
-- `group` : Groupes d'utilisateurs
-- `navigation-item` : Items du menu de navigation
-- `page` : Données des pages
-- `page-[type]` Données des types rattachés aux pages
-- `user` : Données des utilisateurs
+- `configuration` : Configuration du site.
+- `group` : Groupes d'utilisateurs.
+- `navigation-item` : Items du menu de navigation.
+- `page` : Données des pages.
+- `page-[type]` Données des types rattachés aux pages.
+- `user` : Données des utilisateurs.
 
 ## Propriétés publiques
 
 ### Données de la page courante
 
 ```php
-print_t($this->_page);
+var_dump($this->_page);
 ```
 
 ### Données du type rattaché à la page courante
 
 ```php
-print_t($this->_type);
+var_dump($this->_type);
 ```
 
 ### Données de l'utilisateur courant
 
 ```php
-print_t($this->_user);
+var_dump($this->_user);
 ```
 
-### Template
+### Données de configuration
 
 ```php
-$this->template
+var_dump($this->_configuration)
+```
+
+## Méthodes publiques
+
+### Rechercher une clé dans les méthodes HTTP
+
+#### Dans toutes les méthodes
+
+```php
+var_dump($this->get('nom-de-clé'));
+```
+
+L'ordre de recherche est le suivant : POST, GET puis COOKIE.
+
+#### Dans une méthode spécifique
+
+```php
+var_dump($this->get('GET:nom-de-clé'));
+```
+
+##### Méthodes
+
+- `COOKIE` : recherche dans $_COOKIE.
+- `GET` : recherche dans $_GET.
+- `POST` : recherche dans $_POST.
+
+### Rendre un champ obligatoire
+
+```php
+var_dump($this->get('nom-de-clé', true));
+```
+
+La soumission du formulaire échoura si "nom-de-clé" est vide. De plus une notice sera ajoutée dans la vue au champ rattaché :
+
+```
+echo $this->tpl->input('nom-de-clé')
+```
+
+### Utliser le template
+
+```php
+$this->getTemplate()
 ```
 
 [Voir la section dédiée](#template-1) pour plus d'informations sur l'utilisation du template.
 
+
+### Configurer un layout
+
+```php
+$this->setLayout('nom-de-layout');
+```
+
+##### Layouts
+
+- `main` : layout principal.
+- `raw` : layout sans aucun HTML / CSS ajouté.
+
+### Configurer une vue
+
+```php
+$this->setView('nom-de-vue');
+```
+
+### Configurer une librairie
+
+```php
+$this->setVendor(
+    'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.0/tinymce.min.js',
+    'sha256-3DxUi/cwxPOy+wrPilztlynbmi7v25eHEdIJh+nKFOs='
+);
+```
+
+Importe une librairie depuis un CDN, le SRI n'est pas obligatoire.
 
 ## Base de données
 
@@ -101,7 +173,7 @@ Database::create('nom-de-table', [
 
 ```php
 $row = Database::instance('nom-de-table')->find();
-print_r($row);
+var_dump($row);
 ```
 
 #### Sélection multiple
@@ -109,7 +181,7 @@ print_r($row);
 ```php
 $rows = Database::instance('nom-de-table')->findAll();
 foreach ($rows as $row) {
-    print_r($row);
+    var_dump($row);
 }
 ```
 
@@ -230,27 +302,14 @@ Database::instance('nom-de-table")->delete();
 
 ## Template
 
-### Champ simple
+### Bootstrap
 
-```php
-echo $this->template->input('id-du-champ', [
-    'label' => 'Adresse email',
-    'type' => 'email',
-])
-```
-
-##### Attributs spécifiques
-
-- `label` : Label au dessus du champ
-
-##### Attributs génériques
-
-- [Voir la documentation Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Input#Attributs)
+[Voir la documentation de Bootstrap](https://getbootstrap.com/docs/4.3/getting-started/introduction/)
 
 ### Bouton
 
 ```php
-echo $this->template->button('id-du-bouton', 'Valider', [
+echo $this->getTemplate()->button('id-du-bouton', 'Valider', [
     'type' => 'submit',
 ])
 ```
@@ -261,7 +320,41 @@ echo $this->template->button('id-du-bouton', 'Valider', [
 
 ##### Attributs génériques
 
-- [Voir la documentation Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Button#Attributs)
+- [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Button#Attributs)
+
+### Champ court
+
+```php
+echo $this->getTemplate()->input('id-du-champ', [
+    'label' => 'Adresse email',
+    'type' => 'email',
+    'value' => 'email@yoctocms.com',
+])
+```
+
+##### Attributs spécifiques
+
+- `label` : Label au dessus du champ
+
+##### Attributs génériques
+
+- [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Input#Attributs)
+
+### Champ long
+
+```php
+echo $this->getTemplate()->textarea('id-du-champ', 'Un commentaire', [
+    'label' => 'Commentaire',
+])
+```
+
+##### Attributs spécifiques
+
+- `label` : Label au dessus du champ
+
+##### Attributs génériques
+
+- [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Textarea#Attributs)
 
 ## Type de page d'exemple
 
@@ -278,7 +371,7 @@ Liste des fichiers de l'exemple :
 <?php
 
 // Crée une instance du contrôleur
-$controller = new Yocto\ControllerExample($_page, $_user);
+$controller = new Yocto\ControllerExample($_configuration, $_page, $_type, $_user);;
 
 // Initialise les contrôleurs en fonction des routes
 $router = new Yocto\Router($controller->get('action'));
@@ -309,6 +402,15 @@ class ControllerExample extends Controller {
     /**
      * MÉTHODES PUBLIQUES
      */
+    
+    public static function _initDatabase() {
+        if (Database::exists('page-example') === false) {
+            Database::create('page-example', [
+                'foo' => 'string',
+                'bar' => 'string',
+            ]);
+        }
+    }
 
     public function edit() {
         $this->setView('edit');
@@ -322,11 +424,11 @@ class ControllerExample extends Controller {
 
     public function save() {
         $this->_page
-            ->title = $this->get('POST:title')
+            ->title = $this->get('title', true)
             ->save();
         $this->_type
-            ->foo = $this->get('POST:foo')
-            ->bar = $this->get('POST:bar')
+            ->foo = $this->get('foo')
+            ->bar = $this->get('bar')
             ->save();
         $this->setView('index');
         $this->setLayout('main');
@@ -348,19 +450,19 @@ class ControllerExample extends Controller {
 
 ```html
 <form method="post">
-    <?php echo $this->template->input('title', [
+    <?php echo $this->getTemplate()->input('title', [
         'label' => 'Titre de la page',
         'value' => $this->_page->title,
     ]); ?>
-    <?php echo $this->template->input('foo', [
+    <?php echo $this->getTemplate()->input('foo', [
         'label' => 'Titre de la page',
         'value' => $this->_type->foo,
     ]); ?>
-    <?php echo $this->template->input('bar', [
+    <?php echo $this->getTemplate()->input('bar', [
         'label' => 'Titre de la page',
         'value' => $this->_type->bar,
     ]); ?>
-    <?php echo $this->template->button('submit', 'Valider', [
+    <?php echo $this->getTemplate()->button('submit', 'Valider', [
         'type' => 'submit',
     ]); ?>
 </form>

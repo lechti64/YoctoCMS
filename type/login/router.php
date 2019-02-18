@@ -1,7 +1,7 @@
 <?php
 
 // Crée une instance du contrôleur
-$controller = new Yocto\ControllerLogin($_page, $_user);
+$controller = new Yocto\ControllerLogin($_configuration, $_page, $_type, $_user);
 
 // Initialise les contrôleurs en fonction des routes
 $router = new Yocto\Router($controller->get('action'));

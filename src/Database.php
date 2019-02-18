@@ -203,7 +203,7 @@ class Database implements \IteratorAggregate, \Countable {
      * @throws \Exception
      */
     public static function create($table, array $columns = []) {
-        if (is_dir($table) === false AND mkdir(self::PATH . $table) === false) {
+        if (self::exists($table) === false AND mkdir(self::PATH . $table) === false) {
             throw new \Exception('Table "' . $table . '" was not created');
         }
         if (file_put_contents(self::PATH . $table . '/_init.json', json_encode($columns, JSON_PRETTY_PRINT)) === false) {
@@ -250,6 +250,15 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
+     * Check qu'une table existe
+     * @param string $table Nom de la table
+     * @return bool
+     */
+    public static function exists($table) {
+        return is_dir(self::PATH . $table);
+    }
+
+    /**
      * Retourne une ligne
      * @return $this
      * @throws \Exception
@@ -287,7 +296,7 @@ class Database implements \IteratorAggregate, \Countable {
      * @throws \Exception
      */
     public static function instance($table) {
-        if (is_dir(self::PATH . $table) === false) {
+        if (self::exists($table) === false) {
             throw new \Exception('Table "'. $table . '" not found');
         }
         $self = new self();
