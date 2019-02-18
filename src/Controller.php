@@ -8,10 +8,13 @@ class Controller {
      * PROPRIÉTÉS PUBLIQUES
      */
 
-    /** @var \stdClass Page courante */
+    /** @var Database Page courante */
     public $_page;
 
-    /** @var \stdClass Utilisateur courant */
+    /** @var Database Données du type de la page courante */
+    public $_type;
+
+    /** @var Database Utilisateur courant */
     public $_user;
 
     /** @var array Notices */
@@ -44,19 +47,26 @@ class Controller {
 
     /**
      * Constructeur de la classe
-     * @param \stdClass $_page
-     * @param \stdClass $_user
+     * @param Database $_page
+     * @param Database $_user
      * @throws \Exception
      */
-    public function __construct($_page, $_user) {
+    public function __construct(Database $_page, Database $_user) {
+        // Ajoute les données du type rattaché à la page courante
+        $this->_type = Database::instance('page-' . strtolower(str_replace('Yocto\Controller', '', get_class($this))))
+            ->where('id', '=', $_page->id)
+            ->find();
+        // Transmet les données en provenance de ./index.php aux contrôleurs des types de page
         $this->_page = $_page;
         $this->_user = $_user;
-        $this->template = new Template($this);
+        // Ajout des méthodes HTTP
         $this->methods = [
             'POST' => $_POST,
             'GET' => $_GET,
             'COOKIE' => $_COOKIE,
         ];
+        // Crée une instance du template
+        $this->template = new Template($this);
     }
 
     /**

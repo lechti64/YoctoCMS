@@ -1,10 +1,14 @@
-<?php $generalSettings = Yocto\Database::instance('setting')->where('id', '=', 'general')->find(); ?>
 <!doctype html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title><?php echo $generalSettings->title; ?></title>
-    <meta name="description" content="<?php echo $generalSettings->description ?>">
+    <?php
+    $configuration = Yocto\Database::instance('configuration')
+        ->where('id', '=', 'configuration')
+        ->find();
+    ?>
+    <title><?php echo $configuration->title; ?></title>
+    <meta name="description" content="<?php echo $configuration->description ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,700|Montserrat:100">
     <link rel="stylesheet" href="vendor/normalize/normalize.min.css">
@@ -21,26 +25,31 @@
     <div class="navigation__inner">
         <ul class="navigation__nav">
             <?php
-            $navigationItems = Yocto\Database::instance('navigationItem')
+            $navigationItems = Yocto\Database::instance('navigation-item')
                 ->orderBy('position', 'ASC')
-                ->findAll()
+                ->findAll();
             ?>
             <?php foreach ($navigationItems as $navigationItem): ?>
                 <li class="navigation__item">
                     <a class="navigation__link <?php if ($this->_page->id === $navigationItem->id): ?>navigation__link--active<?php endif; ?>" href="?pageId=<?php echo $navigationItem->id; ?>">
-                        <?php echo Yocto\Database::instance('page')->where('id', '=', $navigationItem->id)->find()->title; ?>
+                        <?php
+                        echo Yocto\Database::instance('page')
+                            ->where('id', '=', $navigationItem->id)
+                            ->find()
+                            ->title;
+                        ?>
                     </a>
                 </li>
             <?php endforeach; ?>
         </ul>
         <a class="navigation__title" href="./">
-            <?php echo $generalSettings->title; ?>
+            <?php echo $configuration->title; ?>
         </a>
     </div>
 </nav>
 <header class="header">
     <h1 class="header__title">
-        <?php echo $this->_page->id; ?>
+        <?php echo $this->_page->title; ?>
     </h1>
 </header>
 <section class="section">

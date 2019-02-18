@@ -1,1 +1,1 @@
-<?php echo $this->_page->content; ?>
+<?php echo $this->_type->content; ?>

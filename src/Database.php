@@ -5,18 +5,30 @@ namespace Yocto;
 class Database implements \IteratorAggregate, \Countable {
 
     /**
+     * CONSTANTES
+     */
+    
+    const PATH = ROOT . '/content/data/';
+    
+    /**
      * PROPRIÉTÉS PRIVÉES
      */
 
-    /** @var array Conditions applicables lors d'une requête */
+    /** @var array Conditions */
     private $conditions = [
         'limit'   => [],
         'orderBy' => [],
         'where'   => [],
     ];
 
+    /** @var \stdClass Ligne en sortie (méthode find(), insertion et mise à jour de ligne) */
+    private $outputRow;
+
     /** @var array Lignes en sortie */
     private $outputRows = [];
+
+    /** @var string Nom de la table */
+    private $table;
 
     /** @var array Lignes de la table */
     private $tableRows = [];
@@ -31,7 +43,7 @@ class Database implements \IteratorAggregate, \Countable {
      * @throws \Exception
      */
     private function applyConditions() {
-        $outputRows = $this->outputRows;
+        $outputRows = $this->tableRows;
         if ($this->conditions['where']) {
             $outputRows = $this->applyWhere($outputRows);
         }
@@ -151,7 +163,17 @@ class Database implements \IteratorAggregate, \Countable {
      * @return mixed
      */
     public function __get($column) {
-        return $this->outputRows->$column;
+        return $this->outputRow->$column;
+    }
+
+    /**
+     * Insert la valeur d'une colonne
+     * @param string $column Nom de la colonne
+     * @param mixed $value Valeur de la colonne
+     */
+    public function __set($column, $value) {
+        // TODO : appliquer un filtre
+        $this->outputRow->{$column} = $value;
     }
 
     /**
@@ -175,9 +197,57 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Supprime une ligne
+     * Crée une table
+     * @param string $table Nom de la table
+     * @param array $columns Colonne et type de données
+     * @throws \Exception
      */
-    public function delete() {}
+    public static function create($table, array $columns = []) {
+        if (is_dir($table) === false AND mkdir(self::PATH . $table) === false) {
+            throw new \Exception('Table "' . $table . '" was not created');
+        }
+        if (file_put_contents(self::PATH . $table . '/_init.json', json_encode($columns, JSON_PRETTY_PRINT)) === false) {
+            throw new \Exception('Unable to create the init file of the "' . $table . '" table');
+        }
+    }
+
+    /**
+     * Supprime la table, une ligne ou des lignes
+     * @return bool
+     * @throws \Exception
+     */
+    public function delete() {
+        // Supprime une ligne
+        if ($this->outputRow->id) {
+            if (
+                is_file(self::PATH . $this->table . '/' . $this->outputRow->id . '.json')
+                AND unlink(self::PATH . $this->table . '/' . $this->outputRow->id . '.json') === false
+            ) {
+                throw new \Exception('Row "' . $this->outputRow->id . '" has not been deleted');
+            }
+        }
+        // Supprime des lignes
+        else if ($this->outputRows) {
+            foreach ($this->outputRows as $row) {
+                if (
+                    is_file(self::PATH . $this->table . '/' . $row->id . '.json')
+                    AND unlink(self::PATH . $this->table . '/' . $row->id . '.json') === false
+                ) {
+                    throw new \Exception('Row "' . $row->id . '" has not been deleted');
+                }
+            }
+        }
+        // Supprime la table
+        else {
+            if (in_array(false, array_map('unlink', glob(self::PATH . $this->table . '/*.json')))) {
+                throw new \Exception('Rows have not been deleted in the table "' . $this->table . '"');
+            }
+            if (rmdir(self::PATH . $this->table) === false) {
+                throw new \Exception('Table "' . $this->table . '" has not been deleted');
+            }
+        }
+        return true;
+    }
 
     /**
      * Retourne une ligne
@@ -187,7 +257,7 @@ class Database implements \IteratorAggregate, \Countable {
     public function find() {
         $this->outputRows = $this->applyConditions();
         if ($this->count()) {
-            $this->outputRows = $this->outputRows[0];
+            $this->outputRow = $this->outputRows[0];
         }
         return $this;
     }
@@ -217,18 +287,27 @@ class Database implements \IteratorAggregate, \Countable {
      * @throws \Exception
      */
     public static function instance($table) {
-        if (is_dir(ROOT . '/content/data/' . $table) === false) {
+        if (is_dir(self::PATH . $table) === false) {
             throw new \Exception('Table "'. $table . '" not found');
         }
         $self = new self();
-        foreach (new \DirectoryIterator(ROOT . '/content/data/' . $table) as $file) {
-            if ($file->getExtension() === 'json') {
-                $row = json_decode(file_get_contents(ROOT . '/content/data/' . $table . '/' . $file->getFilename()));
+        $self->table = $table;
+        // Ligne vide, utilisée lors d'un find, d'une mise à jour et d'une insertion
+        $self->outputRow = new \stdClass();
+        $self->outputRow->id = '';
+        $columns = json_decode(file_get_contents(self::PATH . $table . '/_init.json'));
+        foreach ($columns as $column => $type) {
+            // TODO : appliquer un filtre
+            $self->outputRow->{$column} = '';
+        }
+        // Lignes de la table
+        foreach (new \DirectoryIterator(self::PATH . $table) as $file) {
+            if ($file->getExtension() === 'json' AND $file->getFilename() !== '_init.json') {
+                $row = json_decode(file_get_contents(self::PATH . $table . '/' . $file->getFilename()));
                 $row->id = $file->getBasename('.json');
                 $self->tableRows[] = $row;
             }
         }
-        $self->outputRows = $self->tableRows;
         return $self;
     }
 
@@ -273,9 +352,18 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Enregistre la table
+     * Enregistre une ligne
      */
-    public function save() {}
+    public function save() {
+        if ($this->outputRow->id) {
+            $outputRow = clone $this->outputRow;
+            unset($outputRow->id);
+            if (file_put_contents(self::PATH . $this->table . '/' . $this->outputRow->id . '.json', json_encode($outputRow, JSON_PRETTY_PRINT)) === false) {
+                throw new \Exception('Can not insert the row "' . $this->outputRow->id . '"');
+            }
+        }
+        return $this;
+    }
     
     /**
      * Ajout d'une condition sur une colonne

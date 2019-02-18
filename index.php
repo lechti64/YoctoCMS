@@ -14,14 +14,21 @@ $_userId = (isset($_COOKIE['userId'])
     ? $_COOKIE['userId']
     : ''
 );
-$_user = Yocto\Database::instance('user')->where('id', '=', $_userId)->find();
+$_user = Yocto\Database::instance('user')
+    ->where('id', '=', $_userId)
+    ->find();
 
 // Récupère la page courante
 $_pageId = (empty($_GET['pageId'])
-    ? Yocto\Database::instance('setting')->where('id', '=', 'general')->find()->defaultPageId
+    ? Yocto\Database::instance('configuration')
+        ->where('id', '=', 'configuration')
+        ->find()
+        ->defaultPageId
     : $_GET['pageId']
 );
-$_page = Yocto\Database::instance('page')->where('id', '=', $_pageId)->find();
+$_page = Yocto\Database::instance('page')
+    ->where('id', '=', $_pageId)
+    ->find();
 
 // Importe le routeur du type de la page courante
 $router = new Yocto\Router($_page->id);

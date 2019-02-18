@@ -8,8 +8,7 @@
         'type' => 'password',
         'value',
     ]); ?>
-    <?php echo $this->template->submit('password', 'Se connecter', [
-        'label' => 'Mot de passe',
-        'value',
+    <?php echo $this->template->button('password', 'Se connecter', [
+        'type' => 'submit',
     ]); ?>
 </form>

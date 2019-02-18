@@ -130,18 +130,19 @@ class Template {
     }
 
     /**
-     * Crée un bouton de soumission
+     * Crée un bouton
      * @param string $nameId Nom et id de l'élément
      * @param string $text Texte de l'élément
      * @param array $attributes Attributs de l'élément ($key => $value)
      * @return string
      */
-    public function submit($nameId, $text, array $attributes = []) {
+    public function button($nameId, $text, array $attributes = []) {
         // Attributs par défaut
         $attributes = array_merge([
             'class' => '',
             'id' => $nameId,
             'name' => $nameId,
+            'type' => 'button',
         ], $attributes);
         $attributes['class'] .= ' form-element__submit';
         // Retourne l'élément

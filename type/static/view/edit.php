@@ -1,4 +1,4 @@
-<div class="ckeditor"><?php echo $this->_page->content; ?></div>
+<div class="ckeditor"><?php echo $this->_type->content; ?></div>
 <?php echo $this->template->input('title', [
     'label' => 'Title',
     'value' => $this->_page->title,
