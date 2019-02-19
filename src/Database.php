@@ -8,7 +8,7 @@ class Database implements \IteratorAggregate, \Countable {
      * CONSTANTES
      */
     
-    const PATH = ROOT . '/content/data/';
+    const PATH = ROOT . '/content/data';
     
     /**
      * PROPRIÉTÉS PRIVÉES
@@ -20,6 +20,9 @@ class Database implements \IteratorAggregate, \Countable {
         'orderBy' => [],
         'where'   => [],
     ];
+
+    /** @var array Configuration de la table */
+    private $configuration;
 
     /** @var \stdClass Ligne en sortie (méthode find(), insertion et mise à jour de ligne) */
     private $outputRow;
@@ -154,6 +157,26 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
+     * Filtre une valeur
+     * @param mixed $value Valeur
+     * @param string $type Type
+     * @return bool|float|int|string
+     */
+    private function filter($value, $type) {
+        switch ($type) {
+            case 'boolean':
+                return (bool) $value;
+            case 'float':
+                return (float) $value;
+            case 'integer':
+                return (int) $value;
+                break;
+            default:
+                return (string) $value;
+        }
+    }
+
+    /**
      * MÉTHODES PUBLIQUES
      */
 
@@ -170,10 +193,15 @@ class Database implements \IteratorAggregate, \Countable {
      * Insert la valeur d'une colonne
      * @param string $column Nom de la colonne
      * @param mixed $value Valeur de la colonne
+     * @throws \Exception
      */
     public function __set($column, $value) {
-        // TODO : appliquer un filtre
-        $this->outputRow->{$column} = $value;
+        if (array_key_exists($column, $this->configuration['columns'])) {
+            $this->outputRow->{$column} = $this->filter($value, $this->configuration['columns'][$column]);
+        }
+        else {
+            throw new \Exception('Column "' . $column . '" not found in the table "' . $this->table . '"');
+        }
     }
 
     /**
@@ -203,11 +231,11 @@ class Database implements \IteratorAggregate, \Countable {
      * @throws \Exception
      */
     public static function create($table, array $columns = []) {
-        if (self::exists($table) === false AND mkdir(self::PATH . $table) === false) {
+        if (self::exists($table) === false AND mkdir(self::PATH . '/' . $table) === false) {
             throw new \Exception('Table "' . $table . '" was not created');
         }
-        if (file_put_contents(self::PATH . $table . '/_init.json', json_encode($columns, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Unable to create the init file of the "' . $table . '" table');
+        if (file_put_contents(self::PATH . '/' . $table . '/conf.json', json_encode($columns, JSON_PRETTY_PRINT)) === false) {
+            throw new \Exception('Unable to create the configuration file of the "' . $table . '" table');
         }
     }
 
@@ -220,8 +248,8 @@ class Database implements \IteratorAggregate, \Countable {
         // Supprime une ligne
         if ($this->outputRow->id) {
             if (
-                is_file(self::PATH . $this->table . '/' . $this->outputRow->id . '.json')
-                AND unlink(self::PATH . $this->table . '/' . $this->outputRow->id . '.json') === false
+                is_file(self::PATH . '/' . $this->table . '/' . $this->outputRow->id . '.json')
+                AND unlink(self::PATH . '/' . $this->table . '/' . $this->outputRow->id . '.json') === false
             ) {
                 throw new \Exception('Row "' . $this->outputRow->id . '" has not been deleted');
             }
@@ -230,8 +258,8 @@ class Database implements \IteratorAggregate, \Countable {
         else if ($this->outputRows) {
             foreach ($this->outputRows as $row) {
                 if (
-                    is_file(self::PATH . $this->table . '/' . $row->id . '.json')
-                    AND unlink(self::PATH . $this->table . '/' . $row->id . '.json') === false
+                    is_file(self::PATH . '/' . $this->table . '/' . $row->id . '.json')
+                    AND unlink(self::PATH . '/' . $this->table . '/' . $row->id . '.json') === false
                 ) {
                     throw new \Exception('Row "' . $row->id . '" has not been deleted');
                 }
@@ -239,10 +267,10 @@ class Database implements \IteratorAggregate, \Countable {
         }
         // Supprime la table
         else {
-            if (in_array(false, array_map('unlink', glob(self::PATH . $this->table . '/*.json')))) {
+            if (in_array(false, array_map('unlink', glob(self::PATH . '/' . $this->table . '/*.json')))) {
                 throw new \Exception('Rows have not been deleted in the table "' . $this->table . '"');
             }
-            if (rmdir(self::PATH . $this->table) === false) {
+            if (rmdir(self::PATH . '/' . $this->table) === false) {
                 throw new \Exception('Table "' . $this->table . '" has not been deleted');
             }
         }
@@ -255,7 +283,7 @@ class Database implements \IteratorAggregate, \Countable {
      * @return bool
      */
     public static function exists($table) {
-        return is_dir(self::PATH . $table);
+        return is_dir(self::PATH . '/' . $table);
     }
 
     /**
@@ -300,20 +328,21 @@ class Database implements \IteratorAggregate, \Countable {
             throw new \Exception('Table "'. $table . '" not found');
         }
         $self = new self();
+        // Nom de la table
         $self->table = $table;
-        // Ligne vide, utilisée lors d'un find, d'une mise à jour et d'une insertion
+        // Configuration de la table
+        $self->configuration = json_decode(file_get_contents(self::PATH . '/' . $table . '/conf.json'), true);
+        // Ligne vide
         $self->outputRow = new \stdClass();
-        $self->outputRow->id = '';
-        $columns = json_decode(file_get_contents(self::PATH . $table . '/_init.json'));
-        foreach ($columns as $column => $type) {
-            // TODO : appliquer un filtre
-            $self->outputRow->{$column} = '';
+        $self->outputRow->id = 0;
+        foreach ($self->configuration['columns'] as $column => $type) {
+            $self->outputRow->{$column} = null;
         }
         // Lignes de la table
-        foreach (new \DirectoryIterator(self::PATH . $table) as $file) {
-            if ($file->getExtension() === 'json' AND $file->getFilename() !== '_init.json') {
-                $row = json_decode(file_get_contents(self::PATH . $table . '/' . $file->getFilename()));
-                $row->id = $file->getBasename('.json');
+        foreach (new \DirectoryIterator(self::PATH . '/' . $table) as $file) {
+            if ($file->getExtension() === 'json' AND $file->getFilename() !== 'conf.json') {
+                $row = json_decode(file_get_contents(self::PATH . '/' . $table . '/' . $file->getFilename()));
+                $row->id = (int) $file->getBasename('.json');
                 $self->tableRows[] = $row;
             }
         }
@@ -362,14 +391,23 @@ class Database implements \IteratorAggregate, \Countable {
 
     /**
      * Enregistre une ligne
+     * @return $this
+     * @throws \Exception
      */
     public function save() {
-        if ($this->outputRow->id) {
-            $outputRow = clone $this->outputRow;
-            unset($outputRow->id);
-            if (file_put_contents(self::PATH . $this->table . '/' . $this->outputRow->id . '.json', json_encode($outputRow, JSON_PRETTY_PRINT)) === false) {
-                throw new \Exception('Can not insert the row "' . $this->outputRow->id . '"');
-            }
+        // Ajoute un id lors d'une insertion
+        if ($this->outputRow->id === 0) {
+            $this->outputRow->id = $this->configuration['increment']++;
+        }
+        // Incrémente la valeur d'incrémentation de la table
+        if (file_put_contents(self::PATH . '/' . $this->table . '/conf.json', json_encode($this->configuration, JSON_PRETTY_PRINT)) === false) {
+            throw new \Exception('Unable to edit the configuration file of the "' . $this->table . '" table');
+        }
+        // Enregistre la ligne
+        $outputRow = clone $this->outputRow;
+        unset($outputRow->id);
+        if (file_put_contents(self::PATH . '/' . $this->table . '/' . $this->outputRow->id . '.json', json_encode($outputRow, JSON_PRETTY_PRINT)) === false) {
+            throw new \Exception('Can not insert the row "' . $this->outputRow->id . '"');
         }
         return $this;
     }

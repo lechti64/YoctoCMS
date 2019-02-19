@@ -1,0 +1,10 @@
+{
+    "columns": {
+        "blank": "boolean",
+        "navigationId": "integer",
+        "pageId": "integer",
+        "position": "integer",
+        "title": "string"
+    },
+    "increment": 1
+}

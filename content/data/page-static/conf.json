@@ -1,0 +1,7 @@
+{
+    "columns": {
+        "content": "string",
+        "pageId": "integer"
+    },
+    "increment": 1
+}

@@ -2,7 +2,7 @@
 
 namespace Yocto;
 
-abstract class Controller implements ControllerInterface {
+class Controller {
 
     /**
      * PROPRIÉTÉS PUBLIQUES

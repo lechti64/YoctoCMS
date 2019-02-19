@@ -45,6 +45,9 @@
     margin: 0;
     font-size: 0;
 }
+.navigation__items:hover .navigation__link--active {
+    border-color: transparent;
+}
 .navigation__item {
     display: inline-block;
     list-style-type: none;
@@ -67,9 +70,6 @@
     color: #fff;
     text-decoration: none;
     border-color: rgba(255, 255, 255, .8);
-}
-.navigation__items:hover .navigation__link--active {
-    border-color: transparent;
 }
 /*.navigation__sub-navigation {*/
     /*visibility: hidden;*/

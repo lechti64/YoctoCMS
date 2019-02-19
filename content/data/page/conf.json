@@ -1,0 +1,7 @@
+{
+    "columns": {
+        "title": "string",
+        "type": "string"
+    },
+    "increment": 1
+}

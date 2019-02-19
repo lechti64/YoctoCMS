@@ -8,14 +8,6 @@ class ControllerStatic extends Controller {
      * MÉTHODES PUBLIQUES
      */
 
-    public static function _initDatabase() {
-        if (Database::exists('page-static') === false) {
-            Database::create('page-static', [
-                'content' => 'string',
-            ]);
-        }
-    }
-
     public function edit() {
         $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/ckeditor.js');
         $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/translations/fr.js');

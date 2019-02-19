@@ -1,0 +1,8 @@
+{
+    "columns": {
+        "defaultPageId": "integer",
+        "description": "string",
+        "title": "string"
+    },
+    "increment": 1
+}

@@ -24,19 +24,14 @@
             <a class="navigation__title col-auto" href="./"><?php echo $this->_configuration->title; ?></a>
             <ul class="navigation__items col-auto">
                 <?php
-                $navigationItems = Yocto\Database::instance('navigation-item')
+                $navigations = Yocto\Database::instance('navigation')
                     ->orderBy('position', 'ASC')
                     ->findAll();
                 ?>
-                <?php foreach ($navigationItems as $navigationItem): ?>
+                <?php foreach ($navigations as $navigation): ?>
                     <li class="navigation__item">
-                        <a class="navigation__link <?php if ($this->_page->id === $navigationItem->id): ?>navigation__link--active<?php endif; ?>" href="?pageId=<?php echo $navigationItem->id; ?>">
-                            <?php
-                            echo Yocto\Database::instance('page')
-                                ->where('id', '=', $navigationItem->id)
-                                ->find()
-                                ->title;
-                            ?>
+                        <a class="navigation__link <?php if ($this->_page->id === $navigation->id): ?>navigation__link--active<?php endif; ?>" href="?pageId=<?php echo $navigation->pageId; ?>">
+                            <?php echo $navigation->title; ?>
                         </a>
                     </li>
                 <?php endforeach; ?>

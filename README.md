@@ -43,7 +43,7 @@ Un CMS simple, rapide et moderne.
 
 - `configuration` : Configuration du site.
 - `group` : Groupes d'utilisateurs.
-- `navigation-item` : Items du menu de navigation.
+- `navigation` : Items du menu de navigation.
 - `page` : Données des pages.
 - `page-[type]` Données des types rattachés aux pages.
 - `user` : Données des utilisateurs.
@@ -176,7 +176,6 @@ Database::create('nom-de-table', [
 
 - `boolean` : booléen (true ou false).
 - `float` : nombre à virgule.
-- `id` : alphanumérique en minuscule et trait d'union "-".
 - `integer` : entier.
 - `string` : chaîne de caractères.
 
@@ -202,7 +201,6 @@ foreach ($rows as $row) {
 
 ```php
 $row = Database::instance('nom-de-table');
-$row->id = 'nouvelle-ligne';
 $row->title = 'Un titre';
 $row->position = 10;
 $row->status = false;
@@ -213,7 +211,7 @@ $row->save();
 
 ```php
 $row = Database::instance('nom-de-table')
-    ->where('id', '=', 'ligne-existante')
+    ->where('id', '=', 10)
     ->find();
 $row->status = true;
 $row->save();
@@ -443,15 +441,6 @@ class ControllerExample extends Controller {
     /**
      * MÉTHODES PUBLIQUES
      */
-    
-    public static function _initDatabase() {
-        if (Database::exists('page-example') === false) {
-            Database::create('page-example', [
-                'foo' => 'string',
-                'bar' => 'string',
-            ]);
-        }
-    }
 
     public function edit() {
         $this->setView('edit');

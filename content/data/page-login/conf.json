@@ -1,0 +1,6 @@
+{
+  "columns": {
+    "pageId": "integer"
+  },
+  "increment": 1
+}
