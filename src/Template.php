@@ -111,6 +111,37 @@ class Template {
     }
 
     /**
+     * Crée une alerte
+     * @param string $text Texte de l'élément
+     * @param string $type Type d'alerte (primary, secondary, success, danger, warning, info, light, dark)
+     * @param array $attributes Attributs de l'élément ($key => $value)
+     * @return string
+     */
+    public function alert($text, $type = 'success', array $attributes = []) {
+        // Attributs par défaut
+        $attributes = array_merge([
+            'class' => '',
+            'dismissible' => false,
+            'role' => 'alert',
+        ], $attributes);
+        $attributes['class'] .= ' alert alert-' . $type . '';
+        if ($attributes['dismissible']) {
+            $attributes['class'] .= ' alert-dismissible fade show';
+        }
+        // Retourne l'élément
+        return sprintf(
+            '<div %s>%s%s</div>',
+            $this->sprintAttributes($attributes),
+            $text,
+            $this->button(uniqid(), '<span aria-hidden="true">&times;</span>', [
+                'class' => 'close',
+                'data-dismiss' => 'alert',
+                'aria-label' => 'Fermer',
+            ])
+        );
+    }
+
+    /**
      * Crée un bouton
      * @param string $nameId Nom et id de l'élément
      * @param string $text Texte de l'élément

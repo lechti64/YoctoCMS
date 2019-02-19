@@ -10,17 +10,19 @@ require ROOT . '/src/Autoloader.php';
 Yocto\Autoloader::register();
 
 // Génère la base de données par défaut
-$database = json_decode(file_get_contents(Yocto\Database::PATH . '_init.json'), true);
-foreach($database as $table => $rows) {
-    Yocto\Database::create($table, $rows['_init']);
-    foreach($rows as $rowId => $columns) {
-        if($rowId !== '_init') {
-            $row = Yocto\Database::instance($table);
-            $row->id = $rowId;
-            foreach($columns as $columnId => $columnValue) {
-                $row->{$columnId} = $columnValue;
+if (Yocto\Database::exists('configuration') === false) {
+    $database = json_decode(file_get_contents(Yocto\Database::PATH . '_init.json'), true);
+    foreach ($database as $table => $rows) {
+        Yocto\Database::create($table, $rows['_init']);
+        foreach ($rows as $rowId => $columns) {
+            if ($rowId !== '_init') {
+                $row = Yocto\Database::instance($table);
+                $row->id = $rowId;
+                foreach ($columns as $columnId => $columnValue) {
+                    $row->{$columnId} = $columnValue;
+                }
+                $row->save();
             }
-            $row->save();
         }
     }
 }

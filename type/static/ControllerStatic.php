@@ -17,10 +17,8 @@ class ControllerStatic extends Controller {
     }
 
     public function edit() {
-        $this->setVendor(
-            'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.0/tinymce.min.js',
-            'sha256-3DxUi/cwxPOy+wrPilztlynbmi7v25eHEdIJh+nKFOs='
-        );
+        $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/ckeditor.js');
+        $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/translations/fr.js');
         $this->setView('edit');
         $this->setLayout('main');
     }
@@ -31,7 +29,15 @@ class ControllerStatic extends Controller {
     }
 
     public function save() {
-        $this->setView('index');
+        $row = $this->_page;
+        $row->title = $this->get('title', true);
+        $row->save();
+        $row = $this->_type;
+        $row->content = $this->get('content', true);
+        $row->save();
+        $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/ckeditor.js');
+        $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/translations/fr.js');
+        $this->setView('edit');
         $this->setLayout('main');
     }
 

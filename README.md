@@ -118,7 +118,6 @@ $this->getTemplate()
 
 [Voir la section dédiée](#template-1) pour plus d'informations sur l'utilisation du template.
 
-
 ### Configurer un layout
 
 ```php
@@ -140,12 +139,26 @@ $this->setView('nom-de-vue');
 
 ```php
 $this->setVendor(
-    'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.0/tinymce.min.js',
-    'sha256-3DxUi/cwxPOy+wrPilztlynbmi7v25eHEdIJh+nKFOs='
+    'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
+    'sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T'
 );
 ```
 
 Importe une librairie depuis un CDN, le SRI n'est pas obligatoire.
+
+### Configurer l'alerte de soumission
+
+```php
+$this->setAlert('Mon alert.', 'danger');
+```
+
+Il est possible d'utiliser `null` afin de cacher l'alerte après la soumission :
+
+```php
+$this->setAlert(null);
+```
+
+[Voir la section dédiée](#alerte) pour plus d'informations sur les types d'alerte.
 
 ## Base de données
 
@@ -305,6 +318,34 @@ Database::instance('nom-de-table")->delete();
 ### Bootstrap
 
 [Voir la documentation de Bootstrap](https://getbootstrap.com/docs/4.3/getting-started/introduction/)
+
+### Alerte
+
+```php
+echo $this->getTemplate()->alert('Une alerte.', 'success', [
+    'dismissible' => true,
+])
+```
+
+##### Types d'alerte
+
+- `primary` : alerte bleu.
+- `secondary` : alerte gris.
+- `success` : alerte vert.
+- `danger` : alerte rouge.
+- `warning` : alerte orange.
+- `info` :  alerte bleu clair.
+- `light` : alerte gris clair.
+- `dark` : alerte gris foncé.
+
+##### Attributs spécifiques
+
+- `class` : classe de l'alerte.
+- `dismissible` : bouton pour dissimuler l'alerte.
+
+##### Attributs génériques
+
+- Aucun
 
 ### Bouton
 

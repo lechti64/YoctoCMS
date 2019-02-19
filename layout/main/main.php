@@ -13,7 +13,7 @@
         <?php if ($sri): ?>
             <script src="<?php echo $url; ?>" integrity="<?php echo $sri; ?>" crossorigin="anonymous"></script>
         <?php else: ?>
-            <script src="<?php echo $url; ?>" crossorigin="anonymous"></script>
+            <script src="<?php echo $url; ?>"></script>
         <?php endif; ?>
     <?php endforeach; ?>
 </head>
@@ -51,6 +51,7 @@
 </header>
 <section class="section">
     <div class="container">
+        <?php echo $this->getAlert(); ?>
         <?php $this->loadView(); ?>
     </div>
 </section>

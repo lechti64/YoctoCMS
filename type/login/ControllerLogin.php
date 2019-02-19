@@ -20,9 +20,9 @@ class ControllerLogin extends Controller {
     }
 
     public function login() {
-        // Test required
         $this->get('id', true);
         $this->get('password', true);
+        $this->setAlert('Connexion réussie');
         $this->setView('index');
         $this->setLayout('main');
     }

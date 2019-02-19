@@ -8,6 +8,12 @@ abstract class Controller implements ControllerInterface {
      * PROPRIÉTÉS PUBLIQUES
      */
 
+    /** @var string Alerte */
+    public $alert = [
+        'text' => 'Modifications enregistrées.',
+        'type' => 'success',
+    ];
+
     /** @var Database Configuration */
     public $_configuration;
 
@@ -99,6 +105,26 @@ abstract class Controller implements ControllerInterface {
     }
 
     /**
+     * Affiche les alertes
+     * @return string
+     */
+    public function getAlert() {
+        if ($this->notices) {
+            return $this->template->alert('Impossible de soumettre le formulaire, car il contient des erreurs.', 'danger', [
+                'dismissible' => true
+            ]);
+        }
+        else if (empty($_POST) === false AND $this->alert['text']) {
+            return $this->template->alert($this->alert['text'], $this->alert['type'], [
+                'dismissible' => true
+            ]);
+        }
+        else {
+            return '';
+        }
+    }
+
+    /**
      * Accès au template
      */
     public function getTemplate() {
@@ -118,11 +144,23 @@ abstract class Controller implements ControllerInterface {
     public function loadView() {
         $class = strtolower(str_replace('Yocto\Controller', '', get_class($this)));
         require ROOT . '/type/' . $class . '/view/' . $this->view . '.php';
-        if (is_file(ROOT . '/type/' . $class . '/view/' . $this->view . '.js.php')) {
+        if (is_file(ROOT . '/type/' . $class . '/view/' . $this->view . '.js')) {
             echo '<script>';
-            require ROOT . '/type/' . $class . '/view/' . $this->view . '.js.php';
+            require ROOT . '/type/' . $class . '/view/' . $this->view . '.js';
             echo '</script>';
         }
+    }
+
+    /**
+     * Configure l'alerte de soumission
+     * @param string|null $text Texte
+     * @param string $type Type (primary, secondary, success, danger, warning, info, light, dark)
+     */
+    public function setAlert($text, $type = 'success') {
+        $this->alert = [
+            'text' => $text,
+            'type' => $type,
+        ];
     }
 
     /**
