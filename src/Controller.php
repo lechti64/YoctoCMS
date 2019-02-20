@@ -8,12 +8,6 @@ class Controller {
      * PROPRIÉTÉS PUBLIQUES
      */
 
-    /** @var string Alerte */
-    public $alert = [
-        'text' => 'Modifications enregistrées.',
-        'type' => 'success',
-    ];
-
     /** @var Database Configuration */
     public $_configuration;
 
@@ -26,18 +20,24 @@ class Controller {
     /** @var Database Utilisateur courant */
     public $_user;
 
-    /** @var array Notices */
-    public $notices = [];
-
     /**
      * PROPRIÉTÉS PRIVÉES
      */
+
+    /** @var array Alerte */
+    private $alert = [
+        'text' => '',
+        'type' => '',
+    ];
 
     /** @var string Layout */
     private $layout;
 
     /** @var array Méthodes HTTP */
     private $methods = [];
+
+    /** @var array Notices */
+    private $notices = [];
 
     /** @var Template Template */
     private $template;
@@ -105,22 +105,32 @@ class Controller {
     }
 
     /**
-     * Affiche les alertes
+     * Accès au texte de l'alerte
      * @return string
      */
-    public function getAlert() {
-        if ($this->notices) {
-            return $this->template->alert('Impossible de soumettre le formulaire, car il contient des erreurs.', 'danger', [
-                'dismissible' => true
-            ]);
-        }
-        else if (empty($_POST) === false AND $this->alert['text']) {
-            return $this->template->alert($this->alert['text'], $this->alert['type'], [
-                'dismissible' => true
-            ]);
+    public function getAlertText() {
+        return $this->alert['text'];
+    }
+
+    /**
+     * Accès au type de l'alerte
+     * @return string
+     */
+    public function getAlertType() {
+        return $this->alert['type'];
+    }
+
+    /**
+     * Accès à une ou aux notices
+     * @param null $key Clé à rechercher
+     * @return array|string
+     */
+    public function getNotices($key = null) {
+        if ($key) {
+            return isset($this->notices[$key]) ? $this->notices[$key] : '';
         }
         else {
-            return '';
+            return $this->notices;
         }
     }
 

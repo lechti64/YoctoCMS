@@ -16,47 +16,6 @@ class Template {
      */
 
     /**
-     * Crée un groupe
-     * @param string $element Élément à inclure au groupe
-     * @param array $attributes Attributs de l'élément ($key => $value)
-     * @return string
-     */
-    private function formGroup($element, array $attributes = []) {
-        // Attributs par défaut
-        $attributes = array_merge([
-            'class' => '',
-        ], $attributes);
-        $attributes['class'] .= ' form-group';
-        // Retourne l'élément
-        return sprintf(
-            '<div %s>%s</div>',
-            $this->sprintAttributes($attributes),
-            $element
-        );
-    }
-
-    /**
-     * Crée un label
-     * @param string $for Attribut for de l'élément
-     * @param string $text Texte de l'élément
-     * @param array $attributes Attributs de l'élément ($key => $value)
-     * @return string
-     */
-    private function label($for, $text, array $attributes = []) {
-        // Attributs par défaut
-        $attributes = array_merge([
-            'class' => '',
-            'for' => $for,
-        ], $attributes);
-        // Retourne l'élément
-        return sprintf(
-            '<label %s>%s</label>',
-            $this->sprintAttributes($attributes),
-            $text
-        );
-    }
-
-    /**
      * Crée une notice
      * @param string $id Id de l'élément
      * @param string $text Texte de l'élément
@@ -85,10 +44,6 @@ class Template {
      * @return string
      */
     private function sprintAttributes(array $array = [], array $exclude = []) {
-        $exclude = array_merge([
-            'before',
-            'label',
-        ], $exclude);
         $attributes = [];
         foreach ($array as $key => $value) {
             if (in_array($key, $exclude) === false) {
@@ -108,37 +63,6 @@ class Template {
      */
     public function __construct($controller) {
         $this->controller = $controller;
-    }
-
-    /**
-     * Crée une alerte
-     * @param string $text Texte de l'élément
-     * @param string $type Type d'alerte (primary, secondary, success, danger, warning, info, light, dark)
-     * @param array $attributes Attributs de l'élément ($key => $value)
-     * @return string
-     */
-    public function alert($text, $type = 'success', array $attributes = []) {
-        // Attributs par défaut
-        $attributes = array_merge([
-            'class' => '',
-            'dismissible' => false,
-            'role' => 'alert',
-        ], $attributes);
-        $attributes['class'] .= ' alert alert-' . $type . '';
-        if ($attributes['dismissible']) {
-            $attributes['class'] .= ' alert-dismissible fade show';
-        }
-        // Retourne l'élément
-        return sprintf(
-            '<div %s>%s%s</div>',
-            $this->sprintAttributes($attributes),
-            $text,
-            $this->button(uniqid(), '<span aria-hidden="true">&times;</span>', [
-                'class' => 'close',
-                'data-dismiss' => 'alert',
-                'aria-label' => 'Fermer',
-            ])
-        );
     }
 
     /**
@@ -176,34 +100,44 @@ class Template {
         $attributes = array_merge([
             'class' => '',
             'id' => $nameId,
-            'label' => '',
             'maxlength' => '500',
             'name' => $nameId,
             'type' => 'text',
         ], $attributes);
         $attributes['class'] .= ' form-control';
-        if (isset($this->controller->notices[$attributes['id']])) {
-            $attributes['class'] .= ' is-invalid';
-        }
         // Restore la valeur lors d'une erreur de soumission
         if ($value = $this->controller->get('POST:' . $nameId)) {
             $attributes['value'] = $value;
         }
-        // Ajoute le label
-        $html = '';
-        if ($attributes['label']) {
-            $html .= $this->label($attributes['id'], $attributes['label']);
-        }
-        // Ajoute l'élément
-        $html .= sprintf(
-            '<input %s>',
-            $this->sprintAttributes($attributes)
-        );
         // Ajoute la notice
-        if (isset($this->controller->notices[$attributes['id']])) {
-            $html .= $this->notice($attributes['id'], $this->controller->notices[$attributes['id']]);
+        $notice = '';
+        if ($this->controller->getNotices($attributes['id'])) {
+            $attributes['class'] .= ' is-invalid';
+            $notice = $this->notice($attributes['id'], $this->controller->getNotices($attributes['id']));
         }
-        return $this->formGroup($html);
+        // Retourne l'élément
+        return sprintf(
+            '<input %s>%s',
+            $this->sprintAttributes($attributes),
+            $notice
+        );
+    }
+
+    /**
+     * Crée un label
+     * @param string $for Attribut for de l'élément
+     * @param string $text Texte de l'élément
+     * @return string
+     */
+    public function label($for, $text) {
+        // Retourne l'élément
+        return sprintf(
+            '<label %s>%s</label>',
+            $this->sprintAttributes([
+                'for' => $for
+            ]),
+            $text
+        );
     }
 
     /**
@@ -218,34 +152,27 @@ class Template {
         $attributes = array_merge([
             'class' => '',
             'id' => $nameId,
-            'label' => '',
             'maxlength' => '5000',
             'name' => $nameId,
         ], $attributes);
         $attributes['class'] .= ' form-control';
-        if (isset($this->controller->notices[$attributes['id']])) {
-            $attributes['class'] .= ' is-invalid';
-        }
         // Restore la valeur lors d'une erreur de soumission
         if ($value = $this->controller->get('POST:' . $nameId)) {
             $attributes['value'] = $value;
         }
-        // Ajoute le label
-        $html = '';
-        if ($attributes['label']) {
-            $html .= $this->label($attributes['id'], $attributes['label']);
-        }
-        // Ajoute l'élément
-        $html .= sprintf(
-            '<textarea %s>%s</textarea>',
-            $this->sprintAttributes($attributes),
-            $text
-        );
         // Ajoute la notice
-        if (isset($this->controller->notices[$attributes['id']])) {
-            $html .= $this->notice($attributes['id'], $this->controller->notices[$attributes['id']]);
+        $notice = '';
+        if ($this->controller->getNotices($attributes['id'])) {
+            $attributes['class'] .= ' is-invalid';
+            $notice = $this->notice($attributes['id'], $this->controller->getNotices($attributes['id']));
         }
-        return $this->formGroup($html);
+        // Retourne l'élément
+        return sprintf(
+            '<textarea %s>%s</textarea>%s',
+            $this->sprintAttributes($attributes),
+            $text,
+            $notice
+        );
     }
 
 }

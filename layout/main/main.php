@@ -46,7 +46,20 @@
 </header>
 <section class="section">
     <div class="container">
-        <?php echo $this->getAlert(); ?>
+        <?php if ($this->getNotices() OR $this->getAlertText()): ?>
+            <div class="alert alert-<?php echo $this->getNotices() ? 'danger' : $this->getAlertType(); ?> alert-dismissible fade show" role="alert">
+                <?php if ($this->getNotices()): ?>
+                    Impossible de soumettre le formulaire, car il contient des erreurs.
+                <?php else: ?>
+                    <?php echo $this->getAlertText(); ?>
+                <?php endif; ?>
+                <?php echo $this->getTemplate()->button(uniqid(), '<span aria-hidden="true">&times;</span>', [
+                    'class' => 'close',
+                    'data-dismiss' => 'alert',
+                    'aria-label' => 'Fermer',
+                ]); ?>
+            </div>
+        <?php endif; ?>
         <?php $this->loadView(); ?>
     </div>
 </section>

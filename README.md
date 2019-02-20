@@ -73,7 +73,7 @@ dump($this->_user);
 ### Données de configuration
 
 ```php
-dump($this->_configuration)
+dump($this->_configuration);
 ```
 
 ## Méthodes publiques
@@ -108,14 +108,14 @@ dump($this->get('nom-de-clé', true));
 
 La soumission du formulaire échoura si "nom-de-clé" est vide. De plus une notice sera ajoutée dans la vue au champ rattaché :
 
-```
-echo $this->tpl->input('nom-de-clé')
+```php
+echo $this->getTemplate->input('nom-de-clé');
 ```
 
 ### Utliser le template
 
 ```php
-$this->getTemplate()
+$this->getTemplate();
 ```
 
 [Voir la section dédiée](#template-1) pour plus d'informations sur l'utilisation du template.
@@ -160,7 +160,16 @@ Il est possible d'utiliser `null` afin de cacher l'alerte après la soumission :
 $this->setAlert(null);
 ```
 
-[Voir la section dédiée](#alerte) pour plus d'informations sur les types d'alerte.
+##### Types d'alerte
+
+- `primary` : alerte bleu.
+- `secondary` : alerte gris.
+- `success` : alerte vert _(par défaut)_.
+- `danger` : alerte rouge.
+- `warning` : alerte orange.
+- `info` :  alerte bleu clair.
+- `light` : alerte gris clair.
+- `dark` : alerte gris foncé.
 
 ## Base de données
 
@@ -319,49 +328,23 @@ Database::instance('nom-de-table")->delete();
 
 [Voir la documentation de Bootstrap](https://getbootstrap.com/docs/4.3/getting-started/introduction/)
 
-### Alerte
-
-```php
-echo $this->getTemplate()->alert('Une alerte.', 'success', [
-    'dismissible' => true,
-])
-```
-
-##### Types d'alerte
-
-- `primary` : alerte bleu.
-- `secondary` : alerte gris.
-- `success` : alerte vert.
-- `danger` : alerte rouge.
-- `warning` : alerte orange.
-- `info` :  alerte bleu clair.
-- `light` : alerte gris clair.
-- `dark` : alerte gris foncé.
-
-##### Attributs spécifiques
-
-- `class` : classe de l'alerte.
-- `dismissible` : bouton pour dissimuler l'alerte.
-
-##### Attributs génériques
-
-- Aucun
-
 ### Bouton
 
 ```php
 echo $this->getTemplate()->button('id-du-bouton', 'Valider', [
     'type' => 'submit',
-])
+]);
 ```
 
-##### Attributs spécifiques
-
-- Aucun
-
-##### Attributs génériques
+##### Attributs
 
 - [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Button#Attributs)
+
+### Label
+
+```php
+echo $this->getTemplate()->label('id-du-champ-rattaché', 'Label du champ');
+```
 
 ### Champ court
 
@@ -370,14 +353,10 @@ echo $this->getTemplate()->input('id-du-champ', [
     'label' => 'Adresse email',
     'type' => 'email',
     'value' => 'email@yoctocms.com',
-])
+]);
 ```
 
-##### Attributs spécifiques
-
-- `label` : Label au dessus du champ
-
-##### Attributs génériques
+##### Attributs
 
 - [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Input#Attributs)
 
@@ -386,14 +365,10 @@ echo $this->getTemplate()->input('id-du-champ', [
 ```php
 echo $this->getTemplate()->textarea('id-du-champ', 'Un commentaire', [
     'label' => 'Commentaire',
-])
+]);
 ```
 
-##### Attributs spécifiques
-
-- `label` : Label au dessus du champ
-
-##### Attributs génériques
+##### Attributs
 
 - [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Textarea#Attributs)
 
@@ -445,25 +420,31 @@ class ControllerExample extends Controller {
      */
 
     public function edit() {
+        // Affichage
         $this->setView('edit');
         $this->setLayout('main');
     }
 
     public function index() {
+        // Affichage
         $this->setView('index');
         $this->setLayout('main');
     }
 
     public function save() {
-        $this->_page
-            ->title = $this->get('title', true)
-            ->save();
-        $this->_type
-            ->foo = $this->get('foo')
-            ->bar = $this->get('bar')
-            ->save();
-        $this->setView('index');
-        $this->setLayout('main');
+        // Mise à jour de la page
+        $row = $this->_page;
+        $row->title = $this->get('title', true);
+        $row->save();
+        // Mise à jour du type
+        $row = $this->_type;
+        $row->foo = $this->get('foo');
+        $row->bar = $this->get('bar');
+        $row->save();
+        // Alerte
+        $this->setAlert('Modifications enregistrées.');
+        // Affichage
+        $this->edit();
     }
 
 }
@@ -482,18 +463,24 @@ class ControllerExample extends Controller {
 
 ```html
 <form method="post">
-    <?php echo $this->getTemplate()->input('title', [
-        'label' => 'Titre de la page',
-        'value' => $this->_page->title,
-    ]); ?>
-    <?php echo $this->getTemplate()->input('foo', [
-        'label' => 'Titre de la page',
-        'value' => $this->_type->foo,
-    ]); ?>
-    <?php echo $this->getTemplate()->input('bar', [
-        'label' => 'Titre de la page',
-        'value' => $this->_type->bar,
-    ]); ?>
+    <div class="form-group">
+        <?php echo $this->getTemplate()->label('title', 'Titre de la page'); ?>
+        <?php echo $this->getTemplate()->input('title', [
+            'value' => $this->_page->title,
+        ]); ?>
+    </div>
+    <div class="form-group">
+        <?php echo $this->getTemplate()->label('foo', 'Foo'); ?>
+        <?php echo $this->getTemplate()->input('foo', [
+            'value' => $this->_type->foo,
+        ]); ?>
+    </div>
+    <div class="form-group">
+        <?php echo $this->getTemplate()->label('bar', 'Bar'); ?>
+        <?php echo $this->getTemplate()->input('bar', [
+            'value' => $this->_type->bar,
+        ]); ?>
+    </div>
     <?php echo $this->getTemplate()->button('submit', 'Valider', [
         'type' => 'submit',
     ]); ?>
