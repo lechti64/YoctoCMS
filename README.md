@@ -12,6 +12,7 @@ Un CMS simple, rapide et moderne.
 - [Base de données](#base-de-données)
 - [Template](#template-1)
 - [Type de page d'exemple](#type-de-page-dexemple)
+- [Débogage](#débogage)
 
 ## Chemin d'exécution
 
@@ -54,25 +55,25 @@ Un CMS simple, rapide et moderne.
 ### Données de la page courante
 
 ```php
-var_dump($this->_page);
+dump($this->_page);
 ```
 
 ### Données du type rattaché à la page courante
 
 ```php
-var_dump($this->_type);
+dump($this->_type);
 ```
 
 ### Données de l'utilisateur courant
 
 ```php
-var_dump($this->_user);
+dump($this->_user);
 ```
 
 ### Données de configuration
 
 ```php
-var_dump($this->_configuration)
+dump($this->_configuration)
 ```
 
 ## Méthodes publiques
@@ -82,7 +83,7 @@ var_dump($this->_configuration)
 #### Dans toutes les méthodes
 
 ```php
-var_dump($this->get('nom-de-clé'));
+dump($this->get('nom-de-clé'));
 ```
 
 L'ordre de recherche est le suivant : POST, GET puis COOKIE.
@@ -90,7 +91,7 @@ L'ordre de recherche est le suivant : POST, GET puis COOKIE.
 #### Dans une méthode spécifique
 
 ```php
-var_dump($this->get('GET:nom-de-clé'));
+dump($this->get('GET:nom-de-clé'));
 ```
 
 ##### Méthodes
@@ -102,7 +103,7 @@ var_dump($this->get('GET:nom-de-clé'));
 ### Rendre un champ obligatoire
 
 ```php
-var_dump($this->get('nom-de-clé', true));
+dump($this->get('nom-de-clé', true));
 ```
 
 La soumission du formulaire échoura si "nom-de-clé" est vide. De plus une notice sera ajoutée dans la vue au champ rattaché :
@@ -186,7 +187,7 @@ Database::create('nom-de-table', [
 
 ```php
 $row = Database::instance('nom-de-table')->find();
-var_dump($row);
+dump($row);
 ```
 
 #### Sélection multiple
@@ -194,7 +195,7 @@ var_dump($row);
 ```php
 $rows = Database::instance('nom-de-table')->findAll();
 foreach ($rows as $row) {
-    var_dump($row);
+    dump($row);
 }
 ```
 
@@ -498,3 +499,11 @@ class ControllerExample extends Controller {
     ]); ?>
 </form>
 ```
+
+## Débogage
+
+```php
+debug($expression);
+```
+
+Retourne un var_dump() avec formatage.

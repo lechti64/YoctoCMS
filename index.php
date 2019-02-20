@@ -14,6 +14,11 @@ Yocto\Autoloader::register();
 $whoops = new Whoops\Run;
 $whoops->pushHandler(new Whoops\Handler\PrettyPageHandler);
 $whoops->register();
+function dump($expression) {
+    ob_start();
+    var_dump($expression);
+    echo '<pre>' . ob_get_clean() . '</pre>';
+}
 
 // Génère la base de données par défaut
 $checkConfiguration = Yocto\Database::instance('configuration')
