@@ -7,9 +7,9 @@ class Database implements \IteratorAggregate, \Countable {
     /**
      * CONSTANTES
      */
-    
+
     const PATH = ROOT . '/content/data';
-    
+
     /**
      * PROPRIÉTÉS PRIVÉES
      */
@@ -21,20 +21,17 @@ class Database implements \IteratorAggregate, \Countable {
         'where'   => [],
     ];
 
-    /** @var array Configuration de la table */
-    private $configuration;
+    /** @var array Configuration */
+    private $configuration = [];
 
-    /** @var \stdClass Ligne en sortie (méthode find(), insertion et mise à jour de ligne) */
-    private $outputRow;
+    /** @var \stdClass Ligne lors d'un find, insert ou update */
+    private $row;
 
-    /** @var array Lignes en sortie */
-    private $outputRows = [];
+    /** @var array Lignes */
+    private $rows = [];
 
-    /** @var string Nom de la table */
-    private $table;
-
-    /** @var array Lignes de la table */
-    private $tableRows = [];
+    /** @var string Table */
+    private $table = '';
 
     /**
      * METHODES PRIVÉES
@@ -42,31 +39,31 @@ class Database implements \IteratorAggregate, \Countable {
 
     /**
      * Applique les conditions
-     * @return array
      * @throws \Exception
      */
     private function applyConditions() {
-        $outputRows = $this->tableRows;
+        // Applique les conditions where
         if ($this->conditions['where']) {
-            $outputRows = $this->applyWhere($outputRows);
+            $this->applyWhere();
         }
+        // Applique la condition orderBy
         if ($this->conditions['orderBy']) {
-            $this->applyOrderBy($outputRows);
+            $this->applyOrderBy();
         }
+        // Applique la condition limit
         if ($this->conditions['limit']) {;
-            $outputRows = $this->applyLimit($outputRows);
+            $this->applyLimit();
         }
-        return array_values($outputRows);
+        // Réindexation
+        $this->rows = array_values($this->rows);
     }
 
     /**
      * Applique la condition limit
-     * @param array $outputRows Lignes en sortie à traiter
-     * @return array
      */
-    private function applyLimit($outputRows) {
-        return array_slice(
-            $outputRows,
+    private function applyLimit() {
+        $this->rows = array_slice(
+            $this->rows,
             $this->conditions['limit']['offset'],
             $this->conditions['limit']['length']
         );
@@ -74,10 +71,9 @@ class Database implements \IteratorAggregate, \Countable {
 
     /**
      * Applique la condition orderBy
-     * @param array $outputRows Lignes en sortie à traiter
      */
-    private function applyOrderBy(&$outputRows) {
-        uasort($outputRows, function($a, $b) {
+    private function applyOrderBy() {
+        uasort($this->rows, function($a, $b) {
             if ($this->conditions['orderBy']['direction'] === 'ASC') {
                 return strnatcasecmp(
                     $a->{$this->conditions['orderBy']['column']},
@@ -98,11 +94,9 @@ class Database implements \IteratorAggregate, \Countable {
 
     /**
      * Applique la condition where
-     * @param array $outputRows Lignes en sortie à traiter
-     * @return array
      */
-    private function applyWhere($outputRows) {
-        return array_filter($outputRows, function($row) {
+    private function applyWhere() {
+        $this->rows = array_filter($this->rows, function($row) {
             $isFound = [
                 'AND' => null,
                 'OR' => null,
@@ -181,23 +175,23 @@ class Database implements \IteratorAggregate, \Countable {
      */
 
     /**
-     * Retourne la valeur d'une colonne lorsque la méthode find est utilisée
-     * @param string $column Nom de la colonne
+     * Retourne une valeur lors d'un find, insert ou update
+     * @param string $column Colonne
      * @return mixed
      */
     public function __get($column) {
-        return $this->outputRow->$column;
+        return $this->row->{$column};
     }
 
     /**
-     * Insert la valeur d'une colonne
-     * @param string $column Nom de la colonne
-     * @param mixed $value Valeur de la colonne
+     * Insert une valeur lors d'un find, insert ou update
+     * @param string $column Colonne
+     * @param mixed $value Valeur
      * @throws \Exception
      */
     public function __set($column, $value) {
         if (array_key_exists($column, $this->configuration['columns'])) {
-            $this->outputRow->{$column} = $this->filter($value, $this->configuration['columns'][$column]);
+            $this->row->{$column} = $this->filter($value, $this->configuration['columns'][$column]);
         }
         else {
             throw new \Exception('Column "' . $column . '" not found in the table "' . $this->table . '"');
@@ -205,10 +199,10 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Alias de la méthode where
-     * @param string $column Nom de la colonne
+     * Alias de where
+     * @param string $column Colonne
      * @param string $comparisonOperators Opérateur de comparaison (=, !=, >, >=, <, <=, IN, NOT IN, LIKE)
-     * @param string $value Valeur de la colonne
+     * @param string $value Valeur
      * @return $this
      */
     public function andWhere($column, $comparisonOperators, $value) {
@@ -217,24 +211,30 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Compte le nombre de lignes en sortie
+     * Compte le nombre de lignes
      * @return int
      */
     public function count() {
-        return count($this->outputRows);
+        return count($this->rows);
     }
 
     /**
      * Crée une table
-     * @param string $table Nom de la table
+     * @param string $table Table
      * @param array $columns Colonne et type de données
      * @throws \Exception
      */
     public static function create($table, array $columns = []) {
+        // Crée la table
         if (self::exists($table) === false AND mkdir(self::PATH . '/' . $table) === false) {
             throw new \Exception('Table "' . $table . '" was not created');
         }
-        if (file_put_contents(self::PATH . '/' . $table . '/conf.json', json_encode($columns, JSON_PRETTY_PRINT)) === false) {
+        // Crée le fichier de configuration
+        $configuration = [
+            'columns' => $columns,
+            'increment' => 1,
+        ];
+        if (file_put_contents(self::PATH . '/' . $table . '/conf.json', json_encode($configuration, JSON_PRETTY_PRINT)) === false) {
             throw new \Exception('Unable to create the configuration file of the "' . $table . '" table');
         }
     }
@@ -246,17 +246,17 @@ class Database implements \IteratorAggregate, \Countable {
      */
     public function delete() {
         // Supprime une ligne
-        if ($this->outputRow->id) {
+        if ($this->row->id) {
             if (
-                is_file(self::PATH . '/' . $this->table . '/' . $this->outputRow->id . '.json')
-                AND unlink(self::PATH . '/' . $this->table . '/' . $this->outputRow->id . '.json') === false
+                is_file(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json')
+                AND unlink(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json') === false
             ) {
-                throw new \Exception('Row "' . $this->outputRow->id . '" has not been deleted');
+                throw new \Exception('Row "' . $this->row->id . '" has not been deleted');
             }
         }
         // Supprime des lignes
-        else if ($this->outputRows) {
-            foreach ($this->outputRows as $row) {
+        else if ($this->rows) {
+            foreach ($this->rows as $row) {
                 if (
                     is_file(self::PATH . '/' . $this->table . '/' . $row->id . '.json')
                     AND unlink(self::PATH . '/' . $this->table . '/' . $row->id . '.json') === false
@@ -278,8 +278,8 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Check qu'une table existe
-     * @param string $table Nom de la table
+     * Test l'existence d'une table
+     * @param string $table Table
      * @return bool
      */
     public static function exists($table) {
@@ -292,9 +292,9 @@ class Database implements \IteratorAggregate, \Countable {
      * @throws \Exception
      */
     public function find() {
-        $this->outputRows = $this->applyConditions();
+        $this->applyConditions();
         if ($this->count()) {
-            $this->outputRow = $this->outputRows[0];
+            $this->row = $this->rows[0];
         }
         return $this;
     }
@@ -305,21 +305,21 @@ class Database implements \IteratorAggregate, \Countable {
      * @throws \Exception
      */
     public function findAll() {
-        $this->outputRows = $this->applyConditions();
+        $this->applyConditions();
         return $this;
     }
 
     /**
-     * Crée l'itérateur à partir de la propriété $this->>outputRows
+     * Crée l'itérateur
      * @return \ArrayIterator
      */
     public function getIterator() {
-        return new \ArrayIterator($this->outputRows);
+        return new \ArrayIterator($this->rows);
     }
 
     /**
-     * Crée une instance de la table
-     * @param string $table Nom de la table
+     * Crée l'instance d'une table
+     * @param string $table Table
      * @return Database
      * @throws \Exception
      */
@@ -328,31 +328,31 @@ class Database implements \IteratorAggregate, \Countable {
             throw new \Exception('Table "'. $table . '" not found');
         }
         $self = new self();
-        // Nom de la table
+        // Table instanciée
         $self->table = $table;
         // Configuration de la table
         $self->configuration = json_decode(file_get_contents(self::PATH . '/' . $table . '/conf.json'), true);
         // Ligne vide
-        $self->outputRow = new \stdClass();
-        $self->outputRow->id = 0;
+        $self->row = new \stdClass();
+        $self->row->id = 0;
         foreach ($self->configuration['columns'] as $column => $type) {
-            $self->outputRow->{$column} = $self->filter('', $self->configuration['columns'][$column]);
+            $self->row->{$column} = $self->filter('', $self->configuration['columns'][$column]);
         }
         // Lignes de la table
         foreach (new \DirectoryIterator(self::PATH . '/' . $table) as $file) {
             if ($file->getExtension() === 'json' AND $file->getFilename() !== 'conf.json') {
                 $row = json_decode(file_get_contents(self::PATH . '/' . $table . '/' . $file->getFilename()));
                 $row->id = (int) $file->getBasename('.json');
-                $self->tableRows[] = $row;
+                $self->rows[] = $row;
             }
         }
         return $self;
     }
 
     /**
-     * Extrait une portion des lignes
+     * Ajoute condition une limit
      * @param int $offset Index de début
-     * @param int $length Nombre de lignes à extraire
+     * @param int $length Nombre de lignes
      * @return $this
      */
     public function limit($offset, $length) {
@@ -364,8 +364,8 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Tri les lignes
-     * @param string $column Colonne à utiliser pour le tri
+     * Ajoute une condition orderBy
+     * @param string $column Colonne
      * @param string $direction Ordre de tri (ASC ou DESC)
      * @return $this
      */
@@ -378,10 +378,10 @@ class Database implements \IteratorAggregate, \Countable {
     }
 
     /**
-     * Alias de la méthode where
-     * @param string $column Nom de la colonne
+     * Alias de where
+     * @param string $column Colonne
      * @param string $comparisonOperators Opérateur de comparaison (=, !=, >, >=, <, <=, IN, NOT IN, LIKE)
-     * @param string $value Valeur de la colonne
+     * @param string $value Valeur
      * @return $this
      */
     public function orWhere($column, $comparisonOperators, $value) {
@@ -396,27 +396,27 @@ class Database implements \IteratorAggregate, \Countable {
      */
     public function save() {
         // Ajoute un id lors d'une insertion
-        if ($this->outputRow->id === 0) {
-            $this->outputRow->id = $this->configuration['increment']++;
+        if ($this->row->id === 0) {
+            $this->row->id = $this->configuration['increment']++;
         }
-        // Incrémente la valeur d'incrémentation de la table
+        // Incrémente le fichier de configuration
         if (file_put_contents(self::PATH . '/' . $this->table . '/conf.json', json_encode($this->configuration, JSON_PRETTY_PRINT)) === false) {
             throw new \Exception('Unable to edit the configuration file of the "' . $this->table . '" table');
         }
         // Enregistre la ligne
-        $outputRow = clone $this->outputRow;
-        unset($outputRow->id);
-        if (file_put_contents(self::PATH . '/' . $this->table . '/' . $this->outputRow->id . '.json', json_encode($outputRow, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Can not insert the row "' . $this->outputRow->id . '"');
+        $row = clone $this->row;
+        unset($row->id);
+        if (file_put_contents(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json', json_encode($row, JSON_PRETTY_PRINT)) === false) {
+            throw new \Exception('Can not insert the row "' . $this->row->id . '"');
         }
         return $this;
     }
-    
+
     /**
-     * Ajout d'une condition sur une colonne
-     * @param string $column Nom de la colonne
+     * Ajoute une condition where
+     * @param string $column Colonne
      * @param string $comparisonOperators Opérateur de comparaison (=, !=, >, >=, <, <=, IN, NOT IN, LIKE)
-     * @param string $value Valeur de la colonne
+     * @param string $value Valeur
      * @param string $logicalOperator Opérateur logique (AND ou OR)
      * @return $this
      */

@@ -21,7 +21,7 @@ class ControllerLogin extends Controller {
             ->where('email', '=', $email)
             ->find();
         // Connexion réussie
-        if($user->id AND password_verify($password, $user->password)) {
+        if ($user->id AND password_verify($password, $user->password)) {
             setcookie('YOCTO_USER_ID', $user->id, time() + 3600 * 24);
             header('Location: ./');
             exit;
