@@ -5,9 +5,15 @@ define('ROOT', __DIR__);
 // Ouvre une session
 session_start();
 
-// Charge l'autoloader des classes
+// Charge les autoloaders
+require ROOT . '/vendor/autoload.php';
 require ROOT . '/src/Autoloader.php';
 Yocto\Autoloader::register();
+
+// Charge le gestionnaire d'erreurs
+$whoops = new Whoops\Run;
+$whoops->pushHandler(new Whoops\Handler\PrettyPageHandler);
+$whoops->register();
 
 // Génère la base de données par défaut
 $checkConfiguration = Yocto\Database::instance('configuration')

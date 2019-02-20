@@ -18,7 +18,8 @@ Un CMS simple, rapide et moderne.
 ### 1. index.php
 
 - Ouvre une session,
-- Charge l'autoloader des classes,
+- Charge les autoloaders,
+- Charge le gestionnaire d'erreurs,
 - Génère la base de données par défaut,
 - Récupère la configuration ([$_configuration](#données-de-configuration)),
 - Récupère l'utilisateur courant ([$_user](#données-de-lutilisateur-courant)),

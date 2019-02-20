@@ -1,4 +1,6 @@
-# PhpStorm
-.idea/
 # Base de données
 content/
+# Composer
+composer.phar
+# PhpStorm
+.idea/

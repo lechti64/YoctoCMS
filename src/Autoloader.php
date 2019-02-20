@@ -17,17 +17,15 @@ class Autoloader {
 
     /**
      * Fonction d'autoload
-     * @param string $class Nom de la classe
+     * @param string $class Classe
      */
     public static function autoload($class) {
         // Supprime le namespace
         $class = str_replace('Yocto\\', '', $class);
         // Importe le fichier de la classe
-        // Cas : classe de Yocto
         if (is_file(ROOT . '/src/' . $class . '.php')) {
             require ROOT . '/src/' . $class . '.php';
         }
-        // Cas : classe d'un contrôleur
         else {
             $directoryName = strtolower(str_replace('Controller', '', $class));
             if (is_file(ROOT . '/type/' . $directoryName . '/' . $class . '.php')) {
