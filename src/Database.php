@@ -336,7 +336,7 @@ class Database implements \IteratorAggregate, \Countable {
         $self->outputRow = new \stdClass();
         $self->outputRow->id = 0;
         foreach ($self->configuration['columns'] as $column => $type) {
-            $self->outputRow->{$column} = null;
+            $self->outputRow->{$column} = $self->filter('', $self->configuration['columns'][$column]);
         }
         // Lignes de la table
         foreach (new \DirectoryIterator(self::PATH . '/' . $table) as $file) {
