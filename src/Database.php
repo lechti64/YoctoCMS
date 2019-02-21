@@ -157,6 +157,11 @@ class Database implements \IteratorAggregate, \Countable {
      * @return bool|float|int|string
      */
     private function filter($value, $type) {
+        // Pas de filtre pour une valeur null, car null signifie qu'un champ obligatoire est vide
+        if($value === null) {
+            return null;
+        }
+        // Filtre la valeur
         switch ($type) {
             case 'boolean':
                 return (bool) $value;
@@ -164,7 +169,6 @@ class Database implements \IteratorAggregate, \Countable {
                 return (float) $value;
             case 'integer':
                 return (int) $value;
-                break;
             default:
                 return (string) $value;
         }
@@ -391,10 +395,17 @@ class Database implements \IteratorAggregate, \Countable {
 
     /**
      * Enregistre une ligne
-     * @return $this
+     * @param bool $previousSave Retour de l'enregistrement précédent
+     * @return bool
      * @throws \Exception
      */
-    public function save() {
+    public function save($previousSave = true) {
+        // Échec d'enregistrement si :
+        // - un valeur est égale à null, car null signifie qu'un champ obligatoire est vide
+        // - l'enregistrement prédédent à fonctionné
+        if(in_array(null, (array) $this->row) OR $previousSave === false) {
+            return false;
+        }
         // Ajoute un id lors d'une insertion
         if ($this->row->id === 0) {
             $this->row->id = $this->configuration['increment']++;
@@ -409,7 +420,7 @@ class Database implements \IteratorAggregate, \Countable {
         if (file_put_contents(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json', json_encode($row, JSON_PRETTY_PRINT)) === false) {
             throw new \Exception('Can not insert the row "' . $this->row->id . '"');
         }
-        return $this;
+        return true;
     }
 
     /**

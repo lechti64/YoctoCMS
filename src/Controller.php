@@ -99,9 +99,10 @@ class Controller {
         // Génère une notice
         if ($required) {
             $this->notices[$key] = 'Champ requis';
+            // Retourne null car cela bloque l'enregistrement des données
+            return null;
         }
-        // Clé introuvable
-        return "";
+        return '';
     }
 
     /**

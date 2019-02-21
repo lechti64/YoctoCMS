@@ -106,7 +106,9 @@ dump($this->get('GET:nom-de-clé'));
 dump($this->get('nom-de-clé', true));
 ```
 
-La soumission du formulaire échoura si "nom-de-clé" est vide. De plus une notice sera ajoutée dans la vue au champ rattaché :
+La soumission du formulaire échoura si la valeur de la clé "nom-de-clé" est vide. De plus la valeur `null` sera retournée et une notice ajoutée dans la vue au champ rattaché :
+
+La valeur `null` permet de bloquer l'enregistrer des données en base, pour plus d'informations voir les sections "[Insertion](#insertion)" et "[Mise à jour](#mise-à-jour)".
 
 ```php
 echo $this->getTemplate->input('nom-de-clé');
@@ -210,6 +212,8 @@ foreach ($rows as $row) {
 
 ### Insertion
 
+#### Insertion dans une table
+
 ```php
 $row = Database::instance('nom-de-table');
 $row->title = 'Un titre';
@@ -217,6 +221,28 @@ $row->position = 10;
 $row->status = false;
 $row->save();
 ```
+
+Lorsque l'une des valeurs est égale à `null`, l'enregistrement de la ligne se bloque. Cela permet de gérer des colonnes obligatoires.
+
+#### Insertion dans plusieurs tables avec bloquage en cas d'erreur
+
+```php
+$row = Database::instance('nom-de-table-1');
+$row->title = 'Un titre';
+$row->position = 10;
+$row->status = false;
+$save = $row->save();
+
+$row = Database::instance('nom-de-table-2');
+$row->foo = 'Foo';
+$save = $row->save($save);
+
+$row = Database::instance('nom-de-table-3');
+$row->bar = 'Bar';
+$row->save($save);
+```
+
+Si une méthode `save()` retourne false les prochaines seront bloquées.
 
 ### Mise à jour
 
@@ -227,6 +253,8 @@ $row = Database::instance('nom-de-table')
 $row->status = true;
 $row->save();
 ```
+
+Lorsque l'une des valeurs est égale à `null`, l'enregistrement de la ligne se bloque. Cela permet de gérer des colonnes obligatoires.
 
 ### Conditions
 

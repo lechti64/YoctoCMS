@@ -27,11 +27,11 @@ class ControllerStatic extends Controller {
         // Mise à jour de la page
         $row = $this->_page;
         $row->title = $this->get('title', true);
-        $row->save();
+        $save = $row->save();
         // Mise à jour du type
         $row = $this->_type;
         $row->content = $this->get('content', true);
-        $row->save();
+        $row->save($save);
         // Alerte
         $this->setAlert('Modifications enregistrées.');
         // Affichage
