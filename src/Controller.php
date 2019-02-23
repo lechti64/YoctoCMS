@@ -43,7 +43,9 @@ class Controller
 
     /**
      * Constructeur de la classe
+     * @param Database $_configuration
      * @param Database $_page
+     * @param Database $_type
      * @param Database $_user
      * @throws \Exception
      */

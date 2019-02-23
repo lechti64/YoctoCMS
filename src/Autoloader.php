@@ -25,7 +25,10 @@ class Autoloader
         if (is_file(ROOT . '/src/' . $class . '.php')) {
             require ROOT . '/src/' . $class . '.php';
         } else {
-            $directoryName = strtolower(str_replace('Controller', '', $class));
+            $directoryName = preg_replace_callback('/(?!^)([A-Z])/', function ($letter) {
+                return strtolower('-' . $letter[1]);
+            }, $class);
+            $directoryName = str_replace('Controller-', '', $directoryName);
             if (is_file(ROOT . '/type/' . $directoryName . '/' . $class . '.php')) {
                 require ROOT . '/type/' . $directoryName . '/' . $class . '.php';
             }

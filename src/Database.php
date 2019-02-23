@@ -260,7 +260,7 @@ class Database implements \IteratorAggregate, \Countable
     public function save()
     {
         // Échec d'enregistrement si un valeur est égale à null, car null signifie qu'un champ obligatoire est vide
-        if (in_array(null, (array)$this->row)) {
+        if (in_array(null, (array)$this->row, true)) {
             return false;
         }
         // Ajoute un id lors d'une insertion
