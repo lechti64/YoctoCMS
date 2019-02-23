@@ -111,7 +111,7 @@ La soumission du formulaire échoura si la valeur de la clé "nom-de-clé" est v
 La valeur `null` permet de bloquer l'enregistrer des données en base, pour plus d'informations voir les sections "[Insertion](#insertion)" et "[Mise à jour](#mise-à-jour)".
 
 ```php
-echo $this->getTemplate->input('nom-de-clé');
+echo $this->getTemplate()->input('nom-de-clé');
 ```
 
 ### Utliser le template
@@ -414,20 +414,17 @@ Liste des fichiers de l'exemple :
 ```php
 <?php
 
-// Crée une instance du contrôleur
 $controller = new Yocto\ControllerExample($_configuration, $_page, $_type, $_user);;
-
-// Initialise les contrôleurs en fonction des routes
 $router = new Yocto\Router($controller->get('action'));
-$router->map('GET', '/', function() use ($controller) {
+$router->map('GET', '/', function () use ($controller) {
     $controller->index();
     return $controller;
 });
-$router->map('GET', '/edit', function() use ($controller) {
+$router->map('GET', '/edit', function () use ($controller) {
     $controller->edit();
     return $controller;
 });
-$router->map('POST', '/edit', function() use ($controller) {
+$router->map('POST', '/edit', function () use ($controller) {
     $controller->save();
     return $controller;
 });
@@ -441,25 +438,25 @@ return $router->run();
 
 namespace Yocto;
 
-class ControllerExample extends Controller {
+class ControllerExample extends Controller
+{
 
-    /**
-     * MÉTHODES PUBLIQUES
-     */
-
-    public function edit() {
+    public function edit()
+    {
         // Affichage
         $this->setView('edit');
         $this->setLayout('main');
     }
 
-    public function index() {
+    public function index()
+    {
         // Affichage
         $this->setView('index');
         $this->setLayout('main');
     }
 
-    public function save() {
+    public function save()
+    {
         // Mise à jour de la page
         $row = $this->_page;
         $row->title = $this->get('title', true);
@@ -518,7 +515,7 @@ class ControllerExample extends Controller {
 ## Débogage
 
 ```php
-debug($expression);
+dump($expression);
 ```
 
 Retourne un var_dump() avec formatage.

@@ -2,11 +2,8 @@
 
 namespace Yocto;
 
-class Router {
-
-    /**
-     * PROPRIÉTÉS PRIVÉES
-     */
+class Router
+{
 
     /** @var Route[][] Liste des routes */
     private $routes = [
@@ -18,14 +15,11 @@ class Router {
     private $url;
 
     /**
-     * MÉTHODES PUBLIQUES
-     */
-
-    /**
      * Constructeur de la classe
      * @param string $url Url
      */
-    public function __construct($url) {
+    public function __construct($url)
+    {
         $this->url = trim($url, '/');
     }
 
@@ -36,7 +30,8 @@ class Router {
      * @param callable $callback Fonction de callback
      * @throws \Exception
      */
-    public function map($methods, $path, $callback) {
+    public function map($methods, $path, $callback)
+    {
         // Extrait les méthodes
         $methods = explode('|', $methods);
         foreach ($methods as $method) {
@@ -55,7 +50,8 @@ class Router {
      * Exécute le routeur
      * @throws \Exception
      */
-    public function run() {
+    public function run()
+    {
         // Méthode introuvable
         if (isset($this->routes[$_SERVER['REQUEST_METHOD']]) === false) {
             throw new \Exception('Method "' . $_SERVER['REQUEST_METHOD'] . '" does not exist');

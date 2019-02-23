@@ -2,13 +2,11 @@
 
 namespace Yocto;
 
-class ControllerStatic extends Controller {
+class ControllerStatic extends Controller
+{
 
-    /**
-     * MÉTHODES PUBLIQUES
-     */
-
-    public function edit() {
+    public function edit()
+    {
         // Librairies
         $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/ckeditor.js');
         $this->setVendor('https://cdn.ckeditor.com/ckeditor5/11.2.0/classic/translations/fr.js');
@@ -17,13 +15,15 @@ class ControllerStatic extends Controller {
         $this->setLayout('main');
     }
 
-    public function index() {
+    public function index()
+    {
         // Affichage
         $this->setView('index');
         $this->setLayout('main');
     }
 
-    public function save() {
+    public function save()
+    {
         // Mise à jour de la page
         $row = $this->_page;
         $row->title = $this->get('title', true);

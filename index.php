@@ -14,7 +14,8 @@ Yocto\Autoloader::register();
 $whoops = new Whoops\Run;
 $whoops->pushHandler(new Whoops\Handler\PrettyPageHandler);
 $whoops->register();
-function dump($expression) {
+function dump($expression)
+{
     ob_start();
     var_dump($expression);
     echo '<pre>' . ob_get_clean() . '</pre>';
@@ -44,7 +45,7 @@ $_configuration = Yocto\Database::instance('configuration')
 
 // Récupère l'utilisateur courant
 $_userId = (isset($_COOKIE['userId'])
-    ? (int) $_COOKIE['userId']
+    ? (int)$_COOKIE['userId']
     : 0
 );
 $_user = Yocto\Database::instance('user')
@@ -54,7 +55,7 @@ $_user = Yocto\Database::instance('user')
 // Récupère la page courante
 $_pageId = (empty($_GET['pageId'])
     ? $_configuration->defaultPageId
-    : (int) $_GET['pageId']
+    : (int)$_GET['pageId']
 );
 $_page = Yocto\Database::instance('page')
     ->where('id', '=', $_pageId)
@@ -67,7 +68,7 @@ $_type = Yocto\Database::instance('page-' . $_page->type)
 
 // Importe le routeur du type de la page courante
 $router = new Yocto\Router($_page->id);
-$router->map('GET|POST', '/[int:pageId]', function() use ($_configuration, $_page, $_type, $_user) {
+$router->map('GET|POST', '/[int:pageId]', function () use ($_configuration, $_page, $_type, $_user) {
     /** @var Yocto\Controller $controller */
     $controller = require ROOT . '/type/' . $_page->type . '/router.php';
     $controller->loadLayout();
