@@ -1,154 +1,102 @@
 # Yocto
-Un CMS simple, rapide et moderne.
+
+Un CMS simple, rapide et moderne. (en développement)
 
 [Site](http://yoctocms.com/) - [Forum](http://forum.yoctocms.com/) - [GitHub](https://github.com/remijean/YoctoCMS/)
 
 ## Sommaire
 
-- [Chemin d'exécution](#chemin-dexécution)
-- [Schéma de la base de données](#schéma-de-la-base-de-données)
-- [Propriétés publiques](#propriétés-publiques)
-- [Méthodes publiques](#méthodes-publiques)
+- [Propriétés](#propriétés)
+- [Méthodes](#méthodes)
 - [Base de données](#base-de-données)
 - [Template](#template-1)
-- [Type de page d'exemple](#type-de-page-dexemple)
+- [Type de page](#type-de-page)
 - [Débogage](#débogage)
 
-## Chemin d'exécution
+## Propriétés
 
-### 1. index.php
-
-- Ouvre une session,
-- Charge les autoloaders,
-- Charge le gestionnaire d'erreurs,
-- Génère la base de données par défaut,
-- Récupère la configuration ([$_configuration](#données-de-configuration)),
-- Récupère l'utilisateur courant ([$_user](#données-de-lutilisateur-courant)),
-- Récupère la page courante ([$_page](#données-de-la-page-courante)),
-- Récupère les données du type rattaché à la page courante ([$_type](#données-du-type-rattaché-à-la-page-courante)),
-- Importe le routeur du type de la page courante.
-
-### 2. type/[type]/router.php
-
-- Crée une instance du contrôleur,
-- Initialise les contrôleurs en fonction des routes.
-
-### 3. type/[type]/Controller[type].php
-
-- Actions rattachées au contrôleur (ex. : définition de la vue, du layout, des librairies, enregistrement de données...).
-
-### 4. type/[type]/view/[vue].php
-
-- Vue à afficher par le contrôleur.
-
-## Schéma de la base de données
-
-- `configuration` : Configuration du site.
-- `group` : Groupes d'utilisateurs.
-- `navigation` : Items du menu de navigation.
-- `page` : Données des pages.
-- `page-[type]` Données des types rattachés aux pages.
-- `user` : Données des utilisateurs.
-
-## Propriétés publiques
-
-### Données de la page courante
+### Données de la page
 
 ```php
-dump($this->_page);
+$this->_page
 ```
 
-### Données du type rattaché à la page courante
+### Données du type rattaché à la page
 
 ```php
-dump($this->_type);
+$this->_type
 ```
 
-### Données de l'utilisateur courant
+### Données de l'utilisateur
 
 ```php
-dump($this->_user);
+$this->_user
 ```
 
 ### Données de configuration
 
 ```php
-dump($this->_configuration);
+$this->_configuration
 ```
 
-## Méthodes publiques
+## Méthodes
 
 ### Rechercher une clé dans les méthodes HTTP
 
 #### Dans toutes les méthodes
 
 ```php
-dump($this->get('nom-de-clé'));
+$this->get('nom-de-clé')
 ```
 
-L'ordre de recherche est le suivant : POST, GET puis COOKIE.
+L'ordre de recherche est le suivant : POST, GET, COOKIE.
 
 #### Dans une méthode spécifique
 
 ```php
-dump($this->get('GET:nom-de-clé'));
+$this->get('GET:nom-de-clé')
 ```
 
 ##### Méthodes
 
-- `COOKIE` : recherche dans $_COOKIE.
-- `GET` : recherche dans $_GET.
-- `POST` : recherche dans $_POST.
+- `COOKIE` : recherche dans la variable "$_COOKIE".
+- `GET` : recherche dans la variable "$_GET".
+- `POST` : recherche dans la variable "$_POST".
 
-### Rendre un champ obligatoire
-
-```php
-dump($this->get('nom-de-clé', true));
-```
-
-La soumission du formulaire échoura si la valeur de la clé "nom-de-clé" est vide. De plus la valeur `null` sera retournée et une notice ajoutée dans la vue au champ rattaché :
-
-La valeur `null` permet de bloquer l'enregistrer des données en base, pour plus d'informations voir les sections "[Insertion](#insertion)" et "[Mise à jour](#mise-à-jour)".
+### Rendre obligatoire un champ
 
 ```php
-echo $this->getTemplate()->input('nom-de-clé');
+$this->get('nom-de-clé', true)
 ```
 
-### Utliser le template
+La soumission du formulaire échoura si la valeur de la clé "nom-de-clé" est vide. De plus la valeur "null" sera retournée et une notice ajoutée dans la vue.
 
-```php
-$this->getTemplate();
-```
-
-[Voir la section dédiée](#template-1) pour plus d'informations sur l'utilisation du template.
+La valeur "null" bloque l'enregistrement des données, pour plus d'informations voir les sections "[Insertion](#insertion)" ou "[Mise à jour](#mise-à-jour)".
 
 ### Configurer un layout
 
 ```php
-$this->setLayout('nom-de-layout');
+$this->setLayout('nom-de-layout')
 ```
 
 ##### Layouts
 
 - `main` : layout principal.
-- `raw` : layout sans aucun HTML / CSS ajouté.
+- `raw` : layout sans aucun HTML / CSS / JS.
 
 ### Configurer une vue
 
 ```php
-$this->setView('nom-de-vue');
+$this->setView('nom-de-vue')
 ```
 
 ### Configurer une librairie
 
 ```php
-$this->setVendor(
-    'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
-    'sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T'
-);
+$this->setVendor('lien', 'sri');
 ```
 
-Importe une librairie depuis un CDN, le SRI n'est pas obligatoire.
+Importe une librairie depuis un CDN, le SRI n'est pas obligatoire, exemple de CDN : https://cdnjs.com/.
 
 ### Configurer l'alerte de soumission
 
@@ -156,22 +104,11 @@ Importe une librairie depuis un CDN, le SRI n'est pas obligatoire.
 $this->setAlert('Mon alert.', 'danger');
 ```
 
-Il est possible d'utiliser `null` afin de cacher l'alerte après la soumission :
-
-```php
-$this->setAlert(null);
-```
-
 ##### Types d'alerte
 
-- `primary` : alerte bleu.
-- `secondary` : alerte gris.
-- `success` : alerte vert _(par défaut)_.
+- `success` : alerte vert _(valeur par défaut)_.
 - `danger` : alerte rouge.
 - `warning` : alerte orange.
-- `info` :  alerte bleu clair.
-- `light` : alerte gris clair.
-- `dark` : alerte gris foncé.
 
 ## Base de données
 
@@ -198,7 +135,7 @@ Database::create('nom-de-table', [
 
 ```php
 $row = Database::instance('nom-de-table')->find();
-dump($row);
+print_r($row);
 ```
 
 #### Sélection multiple
@@ -206,7 +143,7 @@ dump($row);
 ```php
 $rows = Database::instance('nom-de-table')->findAll();
 foreach ($rows as $row) {
-    dump($row);
+    print_r($row);
 }
 ```
 
@@ -222,29 +159,25 @@ $row->status = false;
 $row->save();
 ```
 
-Lorsque l'une des valeurs est égale à `null`, l'enregistrement de la ligne se bloque. Cela permet de gérer des colonnes obligatoires.
+Lorsqu'une des valeurs est égale à "null", l'enregistrement de la ligne se bloque. Cela permet de gérer les colonnes obligatoires.
 
-#### Insertion dans plusieurs tables avec bloquage en cas d'erreur
+#### Insertion dans plusieurs tables
 
 ```php
-$row = Database::instance('nom-de-table-1');
-$row->title = 'Un titre';
-$row->position = 10;
-$row->status = false;
-$save = $row->save();
+$table1Row = Database::instance('table-1');
+$table1Row->foo = 'foo';
 
-$row = Database::instance('nom-de-table-2');
-$row->foo = 'Foo';
-$save = $row->save($save);
+$table2Row = Database::instance('table-2');
+$table2Row->bar = 'bar';
 
-$row = Database::instance('nom-de-table-3');
-$row->bar = 'Bar';
-$row->save($save);
+Database::saveAll([$table1Row, $table2Row]);
 ```
 
-Si une méthode `save()` retourne false les prochaines seront bloquées.
+Lorsqu'une des valeurs est égale à "null", l'enregistrement des lignes se bloque. Cela permet de gérer les colonnes obligatoires et d'éviter d'enregistrer qu'une partie des lignes.
 
 ### Mise à jour
+
+#### Mise à jour dans une table
 
 ```php
 $row = Database::instance('nom-de-table')
@@ -254,7 +187,25 @@ $row->status = true;
 $row->save();
 ```
 
-Lorsque l'une des valeurs est égale à `null`, l'enregistrement de la ligne se bloque. Cela permet de gérer des colonnes obligatoires.
+Lorsque l'une des valeurs est égale à "null", l'enregistrement de la ligne se bloque. Cela permet de gérer les colonnes obligatoires.
+
+#### Mise à jour dans plusieurs tables
+
+```php
+$table1Row = Database::instance('table-1')
+    ->where('id', '=', 10)
+    ->find();
+$table1Row->foo = 'foo';
+
+$table2Row = Database::instance('table-2')
+    ->where('id', '=', 20)
+    ->find();
+$table2Row->bar = 'bar';
+
+Database::saveAll([$table1Row, $table2Row]);
+```
+
+Lorsqu'une des valeurs est égale à "null", l'enregistrement des lignes se bloque. Cela permet de gérer les colonnes obligatoires et d'éviter d'enregistrer qu'une partie des lignes.
 
 ### Conditions
 
@@ -303,11 +254,10 @@ $rows = Database::instance('nom-de-table")
     ->findAll();
 ```
 
-```php
-$rows = Database::instance('nom-de-table")
-    ->orderBy('position', 'DESC')
-    ->findAll();
-```
+##### Ordres de tri
+
+- `ASC` : croissant
+- `DESC` : décroissant
 
 #### Conditions multiples
 
@@ -400,16 +350,16 @@ echo $this->getTemplate()->textarea('id-du-champ', 'Un commentaire', [
 
 - [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Textarea#Attributs)
 
-## Type de page d'exemple
+## Type de page
 
-Liste des fichiers de l'exemple :
+### Fichiers de l'exemple
 
 - type/example/view/index.php
 - type/example/view/edit.php
 - type/example/ControllerExample.php
 - type/example/router.php
 
-### Le router : type/example/router.php
+### Router (router.php)
 
 ```php
 <?php
@@ -431,7 +381,7 @@ $router->map('POST', '/edit', function () use ($controller) {
 return $router->run();
 ```
 
-### Le contrôleur : type/example/ControllerExample.php
+### Contrôleur (ControllerExample.php)
 
 ```php
 <?php
@@ -458,14 +408,14 @@ class ControllerExample extends Controller
     public function save()
     {
         // Mise à jour de la page
-        $row = $this->_page;
-        $row->title = $this->get('title', true);
-        $row->save();
+        $pageRow = $this->_page;
+        $pageRow->title = $this->get('title', true);
         // Mise à jour du type
-        $row = $this->_type;
-        $row->foo = $this->get('foo');
-        $row->bar = $this->get('bar');
-        $row->save();
+        $typeRow = $this->_type;
+        $typeRow->foo = $this->get('foo');
+        $typeRow->bar = $this->get('bar');
+        // Enregistrement
+        Database::saveAll([$pageRow, $typeRow]);
         // Alerte
         $this->setAlert('Modifications enregistrées.');
         // Affichage
@@ -475,7 +425,7 @@ class ControllerExample extends Controller
 }
 ```
 
-### La vue d'accueil : type/example/view/index.php
+### Vue d'accueil (view/index.php)
 
 ```html
 <ul>
@@ -484,7 +434,7 @@ class ControllerExample extends Controller
 </ul>
 ```
 
-### La vue d'édition : type/example/view/edit.php
+### Vue d'édition (view/edit.php)
 
 ```html
 <form method="post">
@@ -511,6 +461,10 @@ class ControllerExample extends Controller
     ]); ?>
 </form>
 ```
+
+### Javascript des vues
+
+Créer un fichier view/nom-de-la-vue.js afin d'ajouter du Javascript à la vue.
 
 ## Débogage
 

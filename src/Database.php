@@ -47,7 +47,7 @@ class Database implements \IteratorAggregate, \Countable
         if (array_key_exists($column, $this->configuration['columns'])) {
             $this->row->{$column} = $this->filter($value, $this->configuration['columns'][$column]);
         } else {
-            throw new \Exception('Column "' . $column . '" not found in the table "' . $this->table . '"');
+            throw new \Exception('Column "' . $column . '" not found in "' . $this->table . '" table');
         }
     }
 
@@ -83,7 +83,7 @@ class Database implements \IteratorAggregate, \Countable
     {
         // Crée la table
         if (self::exists($table) === false AND mkdir(self::PATH . '/' . $table) === false) {
-            throw new \Exception('Table "' . $table . '" was not created');
+            throw new \Exception('Failed to save "' . $table . '" table');
         }
         // Crée le fichier de configuration
         $configuration = [
@@ -91,7 +91,7 @@ class Database implements \IteratorAggregate, \Countable
             'increment' => 1,
         ];
         if (file_put_contents(self::PATH . '/' . $table . '/conf.json', json_encode($configuration, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Unable to create the configuration file of the "' . $table . '" table');
+            throw new \Exception('Failed to save "conf.json" for "' . $table . '" table');
         }
     }
 
@@ -108,7 +108,7 @@ class Database implements \IteratorAggregate, \Countable
                 is_file(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json')
                 AND unlink(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json') === false
             ) {
-                throw new \Exception('Row "' . $this->row->id . '" has not been deleted');
+                throw new \Exception('Failed to delete "' . $this->row->id . '" row');
             }
         } // Supprime des lignes
         else if ($this->rows) {
@@ -117,16 +117,16 @@ class Database implements \IteratorAggregate, \Countable
                     is_file(self::PATH . '/' . $this->table . '/' . $row->id . '.json')
                     AND unlink(self::PATH . '/' . $this->table . '/' . $row->id . '.json') === false
                 ) {
-                    throw new \Exception('Row "' . $row->id . '" has not been deleted');
+                    throw new \Exception('Failed to delete "' . $row->id . '" row');
                 }
             }
         } // Supprime la table
         else {
             if (in_array(false, array_map('unlink', glob(self::PATH . '/' . $this->table . '/*.json')))) {
-                throw new \Exception('Rows have not been deleted in the table "' . $this->table . '"');
+                throw new \Exception('Row have not been deleted in "' . $this->table . '" table');
             }
             if (rmdir(self::PATH . '/' . $this->table) === false) {
-                throw new \Exception('Table "' . $this->table . '" has not been deleted');
+                throw new \Exception('Failed to delete "' . $this->table . '" table');
             }
         }
         return true;
@@ -185,7 +185,7 @@ class Database implements \IteratorAggregate, \Countable
     public static function instance($table)
     {
         if (self::exists($table) === false) {
-            throw new \Exception('Table "' . $table . '" not found');
+            throw new \Exception('"' . $table . '" table not found');
         }
         $self = new self();
         // Table instanciée
@@ -254,16 +254,13 @@ class Database implements \IteratorAggregate, \Countable
 
     /**
      * Enregistre une ligne
-     * @param bool $previousSave Retour de l'enregistrement précédent
      * @return bool
      * @throws \Exception
      */
-    public function save($previousSave = true)
+    public function save()
     {
-        // Échec d'enregistrement si :
-        // - un valeur est égale à null, car null signifie qu'un champ obligatoire est vide
-        // - l'enregistrement prédédent à fonctionné
-        if (in_array(null, (array)$this->row) OR $previousSave === false) {
+        // Échec d'enregistrement si un valeur est égale à null, car null signifie qu'un champ obligatoire est vide
+        if (in_array(null, (array)$this->row)) {
             return false;
         }
         // Ajoute un id lors d'une insertion
@@ -272,13 +269,34 @@ class Database implements \IteratorAggregate, \Countable
         }
         // Incrémente le fichier de configuration
         if (file_put_contents(self::PATH . '/' . $this->table . '/conf.json', json_encode($this->configuration, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Unable to edit the configuration file of the "' . $this->table . '" table');
+            throw new \Exception('Failed to edit "conf.json" for "' . $this->table . '" table');
         }
         // Enregistre la ligne
         $row = clone $this->row;
         unset($row->id);
         if (file_put_contents(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json', json_encode($row, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Can not insert the row "' . $this->row->id . '"');
+            throw new \Exception('Failed to insert "' . $this->row->id . '" row for "' . $this->table . '" table');
+        }
+        return true;
+    }
+
+    /**
+     * Enregistre les instances demandées
+     * @param Database[] $instances Instances à enregistrer
+     * @return bool
+     * @throws \Exception
+     */
+    public static function saveAll(array $instances = [])
+    {
+        // Bloque l'enregistrement si l'une des instances contient une ligne dont la valeur est égale à null
+        foreach ($instances as $instance) {
+            if (in_array(null, (array)$instance->row)) {
+                return false;
+            }
+        }
+        // Enregistre les instances
+        foreach ($instances as $instance) {
+            $instance->save();
         }
         return true;
     }
@@ -354,7 +372,7 @@ class Database implements \IteratorAggregate, \Countable
                     $a->{$this->conditions['orderBy']['column']}
                 );
             } else {
-                throw new \Exception('Direction "' . $this->conditions['orderBy'] . '" unknown');
+                throw new \Exception('Unknown "' . $this->conditions['orderBy'] . '" direction');
             }
         });
     }
@@ -411,7 +429,7 @@ class Database implements \IteratorAggregate, \Countable
                         );
                         break;
                     default:
-                        throw new \Exception('Logical operator "' . $condition['logicalOperator'] . '" unknown');
+                        throw new \Exception('Unknown "' . $condition['logicalOperator'] . '" logical operator');
                 }
             }
             return ($isFound['OR'] OR $isFound['AND']);

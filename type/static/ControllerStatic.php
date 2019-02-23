@@ -25,13 +25,13 @@ class ControllerStatic extends Controller
     public function save()
     {
         // Mise à jour de la page
-        $row = $this->_page;
-        $row->title = $this->get('title', true);
-        $save = $row->save();
+        $pageRow = $this->_page;
+        $pageRow->title = $this->get('title', true);
         // Mise à jour du type
-        $row = $this->_type;
-        $row->content = $this->get('content', true);
-        $row->save($save);
+        $typeRow = $this->_type;
+        $typeRow->content = $this->get('content', true);
+        // Enregistrement
+        Database::saveAll([$pageRow, $typeRow]);
         // Alerte
         $this->setAlert('Modifications enregistrées.');
         // Affichage

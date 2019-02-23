@@ -159,7 +159,7 @@ class Controller
 
     /**
      * Configure l'alerte de soumission
-     * @param string|null $text Texte
+     * @param string $text Texte
      * @param string $type Type (primary, secondary, success, danger, warning, info, light, dark)
      */
     public function setAlert($text, $type = 'success')
