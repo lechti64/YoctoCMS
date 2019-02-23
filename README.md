@@ -27,12 +27,6 @@ $this->_page
 $this->_type
 ```
 
-### Données de l'utilisateur
-
-```php
-$this->_user
-```
-
 ### Données de configuration
 
 ```php
@@ -309,7 +303,7 @@ Database::instance('nom-de-table")->delete();
 ### Bouton
 
 ```php
-echo $this->getTemplate()->button('id-du-bouton', 'Valider', [
+echo $this->getTemplate()->button('Valider', [
     'type' => 'submit',
 ]);
 ```
@@ -364,7 +358,7 @@ echo $this->getTemplate()->textarea('id-du-champ', 'Un commentaire', [
 ```php
 <?php
 
-$controller = new Yocto\ControllerExample($_configuration, $_page, $_type, $_user);;
+$controller = new Yocto\ControllerExample($_configuration, $_page, $_type);
 $router = new Yocto\Router($controller->get('action'));
 $router->map('GET', '/', function () use ($controller) {
     $controller->index();
@@ -456,15 +450,19 @@ class ControllerExample extends Controller
             'value' => $this->_type->bar,
         ]); ?>
     </div>
-    <?php echo $this->getTemplate()->button('submit', 'Valider', [
+    <?php echo $this->getTemplate()->button('Valider', [
         'type' => 'submit',
     ]); ?>
 </form>
 ```
 
+### CSS des vues
+
+Créer un fichier view/nom-de-la-vue.css afin d'ajouter du CSS à la vue.
+
 ### Javascript des vues
 
-Créer un fichier view/nom-de-la-vue.js afin d'ajouter du Javascript à la vue.
+Créer un fichier view/nom-de-la-vue.js.php afin d'ajouter du Javascript à la vue.
 
 ## Débogage
 

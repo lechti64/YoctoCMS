@@ -4,7 +4,7 @@ namespace Yocto;
 
 class ControllerLogin extends Controller
 {
-    
+
     public function index()
     {
         // Affichage
@@ -14,16 +14,15 @@ class ControllerLogin extends Controller
 
     public function login()
     {
-        $email = $this->get('email', true);
+        $username = $this->get('username', true);
         $password = $this->get('password', true);
-        // Recherche l'utilisateur
-        $user = Database::instance('user')
-            ->where('email', '=', $email)
-            ->find();
         // Connexion réussie
-        if ($user->id AND password_verify($password, $user->password)) {
+        if (
+            $this->_configuration->username === $username
+            AND password_verify($password, $this->_configuration->password)
+        ) {
             // Création du cookie
-            setcookie('YOCTO_USER_ID', $user->id, time() + 3600 * 24);
+            setcookie('YOCTO_LOGGEDIN', true, time() + 3600 * 24);
             // Redirection sur la page d'accueil
             header('Location: ./');
             exit;

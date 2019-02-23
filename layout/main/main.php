@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="layout/main/main.css">
+    <?php $this->loadViewCss(); ?>
     <?php foreach ($this->vendors as $url => $sri): ?>
         <?php if ($sri): ?>
             <script src="<?php echo $url; ?>" integrity="<?php echo $sri; ?>" crossorigin="anonymous"></script>
@@ -21,25 +22,44 @@
 </head>
 <body class="body">
 <nav role="navigation" class="navigation">
-    <div class="container">
-        <div class="row no-gutters align-items-center justify-content-between">
-            <a class="navigation__title col-auto" href="./"><?php echo $this->_configuration->title; ?></a>
-            <ul class="navigation__items col-auto">
-                <?php
-                $navigations = Yocto\Database::instance('navigation')
-                    ->orderBy('position', 'ASC')
-                    ->findAll();
-                ?>
-                <?php foreach ($navigations as $navigation): ?>
-                    <li class="navigation__item">
-                        <a class="navigation__link <?php if ($this->_page->id === $navigation->id): ?>navigation__link--active<?php endif; ?>"
-                           href="?pageId=<?php echo $navigation->pageId; ?>">
-                            <?php echo $navigation->title; ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
+    <div class="container d-flex align-items-center justify-content-between">
+        <a class="navigation__title" href="./"><?php echo $this->_configuration->title; ?></a>
+        <ul class="navigation__items">
+            <?php
+            $navigations = Yocto\Database::instance('navigation')
+                ->where('navigationId', '=', 0)
+                ->orderBy('position', 'ASC')
+                ->findAll();
+            ?>
+            <?php foreach ($navigations as $navigation): ?>
+                <li class="navigation__item">
+                    <a class="navigation__link <?php if ($this->_page->id === $navigation->id): ?>navigation__link--active<?php endif; ?>"
+                       href="?pageId=<?php echo $navigation->pageId; ?>">
+                        <?php echo $navigation->title; ?>
+                    </a>
+                    <?php
+                    $subNavigations = Yocto\Database::instance('navigation')
+                        ->where('navigationId', '=', $navigation->id)
+                        ->orderBy('position', 'ASC')
+                        ->findAll();
+                    ?>
+                    <?php if ($subNavigations): ?>
+                        <div class="navigation__sub-navigation">
+                            <ul class="navigation__sub-items container">
+                                <?php foreach ($subNavigations as $subNavigation): ?>
+                                    <li class="navigation__item">
+                                        <a class="navigation__link <?php if ($this->_page->id === $subNavigation->id): ?>navigation__link--active<?php endif; ?>"
+                                           href="?pageId=<?php echo $subNavigation->pageId; ?>">
+                                            <?php echo $subNavigation->title; ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
     </div>
 </nav>
 <header class="header">
@@ -57,7 +77,7 @@
                 <?php else: ?>
                     <?php echo $this->getAlertText(); ?>
                 <?php endif; ?>
-                <?php echo $this->getTemplate()->button(uniqid(), '<span aria-hidden="true">&times;</span>', [
+                <?php echo $this->getTemplate()->button('<span aria-hidden="true">&times;</span>', [
                     'class' => 'close',
                     'data-dismiss' => 'alert',
                     'aria-label' => 'Fermer',
@@ -82,5 +102,6 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
 <script src="layout/main/main.js"></script>
+<?php $this->loadViewJs(); ?>
 </body>
 </html>

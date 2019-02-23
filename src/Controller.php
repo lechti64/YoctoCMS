@@ -14,9 +14,6 @@ class Controller
     /** @var Database Données du type de la page courante */
     public $_type;
 
-    /** @var Database Utilisateur courant */
-    public $_user;
-
     /** @var array Alerte */
     private $alert = [
         'text' => '',
@@ -46,16 +43,14 @@ class Controller
      * @param Database $_configuration
      * @param Database $_page
      * @param Database $_type
-     * @param Database $_user
      * @throws \Exception
      */
-    public function __construct(Database $_configuration, Database $_page, Database $_type, Database $_user)
+    public function __construct(Database $_configuration, Database $_page, Database $_type)
     {
         // Transmet les données en provenance de ./index.php
         $this->_configuration = $_configuration;
         $this->_page = $_page;
         $this->_type = $_type;
-        $this->_user = $_user;
         // Crée l'instance du template
         $this->template = new Template($this);
         // Ajoute les méthodes HTTP
@@ -70,7 +65,7 @@ class Controller
      * Recherche une clé dans les méthodes HTTP
      * @param string $key Clé à rechercher
      * @param bool $required Clé obligatoire, sinon génère une notice
-     * @return string
+     * @return mixed
      */
     public function get($key, $required = false)
     {
@@ -150,11 +145,30 @@ class Controller
      */
     public function loadView()
     {
-        $class = strtolower(str_replace('Yocto\Controller', '', get_class($this)));
-        require ROOT . '/type/' . $class . '/view/' . $this->view . '.php';
-        if (is_file(ROOT . '/type/' . $class . '/view/' . $this->view . '.js')) {
+        $directoryName = $this->getDirectoryName();
+        require ROOT . '/type/' . $directoryName . '/view/' . $this->view . '.php';
+    }
+
+    /**
+     * Charge le CSS de la vue
+     */
+    public function loadViewCss()
+    {
+        $directoryName = $this->getDirectoryName();
+        if (is_file(ROOT . '/type/' . $directoryName . '/view/' . $this->view . '.css')) {
+            echo '<link rel="stylesheet" href="type/' . $directoryName . '/view/' . $this->view . '.css' . '">';
+        }
+    }
+
+    /**
+     * Charge le JS de la vue
+     */
+    public function loadViewJs()
+    {
+        $directoryName = $this->getDirectoryName();
+        if (is_file(ROOT . '/type/' . $directoryName . '/view/' . $this->view . '.js.php')) {
             echo '<script>';
-            require ROOT . '/type/' . $class . '/view/' . $this->view . '.js';
+            require ROOT . '/type/' . $directoryName . '/view/' . $this->view . '.js.php';
             echo '</script>';
         }
     }
@@ -198,6 +212,19 @@ class Controller
     public function setView($view)
     {
         $this->view = $view;
+    }
+
+    /**
+     * Accès au nom du fichier contenant le contrôleur
+     * @return string
+     */
+    private function getDirectoryName()
+    {
+        $class = str_replace('Yocto\\', '', get_class($this));
+        $directoryName = preg_replace_callback('/(?!^)([A-Z])/', function ($letter) {
+            return strtolower('-' . $letter[1]);
+        }, $class);
+        return str_replace('Controller-', '', $directoryName);
     }
 
 }

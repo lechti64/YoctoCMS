@@ -2,7 +2,9 @@
     "columns": {
         "defaultPageId": "integer",
         "description": "string",
-        "title": "string"
+        "password": "string",
+        "title": "string",
+        "username": "string"
     },
     "increment": 1
 }

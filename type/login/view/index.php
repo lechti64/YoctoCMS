@@ -1,9 +1,7 @@
 <form method="post">
     <div class="form-group">
-        <?php echo $this->getTemplate()->label('email', 'Email'); ?>
-        <?php echo $this->getTemplate()->input('email', [
-            'type' => 'email',
-        ]); ?>
+        <?php echo $this->getTemplate()->label('username', 'Identifiant'); ?>
+        <?php echo $this->getTemplate()->input('username'); ?>
     </div>
     <div class="form-group">
         <?php echo $this->getTemplate()->label('password', 'Mot de passe'); ?>
@@ -11,7 +9,7 @@
             'type' => 'password',
         ]); ?>
     </div>
-    <?php echo $this->getTemplate()->button('submit', 'Se connecter', [
+    <?php echo $this->getTemplate()->button('Se connecter', [
         'type' => 'submit',
     ]); ?>
 </form>

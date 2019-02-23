@@ -90,8 +90,8 @@ class Database implements \IteratorAggregate, \Countable
             'columns' => $columns,
             'increment' => 1,
         ];
-        if (file_put_contents(self::PATH . '/' . $table . '/conf.json', json_encode($configuration, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Failed to save "conf.json" for "' . $table . '" table');
+        if (file_put_contents(self::PATH . '/' . $table . '/config.json', json_encode($configuration, JSON_PRETTY_PRINT)) === false) {
+            throw new \Exception('Failed to save "config.json" for "' . $table . '" table');
         }
     }
 
@@ -191,7 +191,7 @@ class Database implements \IteratorAggregate, \Countable
         // Table instanciée
         $self->table = $table;
         // Configuration de la table
-        $self->configuration = json_decode(file_get_contents(self::PATH . '/' . $table . '/conf.json'), true);
+        $self->configuration = json_decode(file_get_contents(self::PATH . '/' . $table . '/config.json'), true);
         // Ligne vide
         $self->row = new \stdClass();
         $self->row->id = 0;
@@ -200,10 +200,10 @@ class Database implements \IteratorAggregate, \Countable
         }
         // Lignes de la table
         foreach (new \DirectoryIterator(self::PATH . '/' . $table) as $file) {
-            if ($file->getExtension() === 'json' AND $file->getFilename() !== 'conf.json') {
-                $row = json_decode(file_get_contents(self::PATH . '/' . $table . '/' . $file->getFilename()));
-                $row->id = (int)$file->getBasename('.json');
-                $self->rows[] = $row;
+            if ($file->getExtension() === 'json' AND $file->getFilename() !== 'config.json') {
+                $rows = json_decode(file_get_contents(self::PATH . '/' . $table . '/' . $file->getFilename()));
+                $rows->id = (int)$file->getBasename('.json');
+                $self->rows[] = $rows;
             }
         }
         return $self;
@@ -254,22 +254,22 @@ class Database implements \IteratorAggregate, \Countable
 
     /**
      * Enregistre une ligne
-     * @return bool
+     * @return $this
      * @throws \Exception
      */
     public function save()
     {
         // Échec d'enregistrement si un valeur est égale à null, car null signifie qu'un champ obligatoire est vide
         if (in_array(null, (array)$this->row, true)) {
-            return false;
+            return $this;
         }
         // Ajoute un id lors d'une insertion
         if ($this->row->id === 0) {
             $this->row->id = $this->configuration['increment']++;
         }
         // Incrémente le fichier de configuration
-        if (file_put_contents(self::PATH . '/' . $this->table . '/conf.json', json_encode($this->configuration, JSON_PRETTY_PRINT)) === false) {
-            throw new \Exception('Failed to edit "conf.json" for "' . $this->table . '" table');
+        if (file_put_contents(self::PATH . '/' . $this->table . '/config.json', json_encode($this->configuration, JSON_PRETTY_PRINT)) === false) {
+            throw new \Exception('Failed to edit "config.json" for "' . $this->table . '" table');
         }
         // Enregistre la ligne
         $row = clone $this->row;
@@ -277,7 +277,7 @@ class Database implements \IteratorAggregate, \Countable
         if (file_put_contents(self::PATH . '/' . $this->table . '/' . $this->row->id . '.json', json_encode($row, JSON_PRETTY_PRINT)) === false) {
             throw new \Exception('Failed to insert "' . $this->row->id . '" row for "' . $this->table . '" table');
         }
-        return true;
+        return $this;
     }
 
     /**
@@ -451,11 +451,11 @@ class Database implements \IteratorAggregate, \Countable
         // Filtre la valeur
         switch ($type) {
             case 'boolean':
-                return (bool)$value;
+                return filter_var($value, FILTER_VALIDATE_BOOLEAN);
             case 'float':
-                return (float)$value;
+                return filter_var($value, FILTER_VALIDATE_FLOAT);
             case 'integer':
-                return (int)$value;
+                return filter_var($value, FILTER_VALIDATE_INT);
             default:
                 return (string)$value;
         }

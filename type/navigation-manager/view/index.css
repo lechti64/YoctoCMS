@@ -1,0 +1,7 @@
+.navigation-link {
+    cursor: pointer;
+}
+
+.navigation-links-children :first-child {
+    margin-top: .5rem;
+}

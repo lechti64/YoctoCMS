@@ -1,6 +1,6 @@
 <?php
 
-$controller = new Yocto\ControllerStatic($_configuration, $_page, $_type, $_user);
+$controller = new Yocto\ControllerStatic($_configuration, $_page, $_type);
 $router = new Yocto\Router($controller->get('action'));
 $router->map('GET', '/', function () use ($controller) {
     $controller->index();

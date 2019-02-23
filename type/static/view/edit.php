@@ -8,7 +8,7 @@
     <div class="form-group">
         <?php echo $this->getTemplate()->textarea('content', $this->_type->content); ?>
     </div>
-    <?php echo $this->getTemplate()->button('submit', 'Enregistrer', [
+    <?php echo $this->getTemplate()->button('Enregistrer', [
         'type' => 'submit',
     ]); ?>
 </form>

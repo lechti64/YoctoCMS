@@ -1,8 +1,0 @@
-{
-    "columns": {
-        "email": "string",
-        "name": "string",
-        "password": "string"
-    },
-    "increment": 1
-}

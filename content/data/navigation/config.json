@@ -4,7 +4,8 @@
         "navigationId": "integer",
         "pageId": "integer",
         "position": "integer",
-        "title": "string"
+        "title": "string",
+        "visibility": "string"
     },
     "increment": 1
 }
