@@ -1,54 +1,58 @@
-// Tri des liens
-function sortable(container) {
+// Tri des liens dans un container
+function sortable(container, swapThreshold) {
     return Sortable.create(container.get(0), {
         group: "navigation-links",
         animation: 150,
-        emptyInsertThreshold: 5,
+        swapThreshold: swapThreshold,
+        invertSwap: true,
         dragoverBubble: true,
         onEnd: function (event) {
             var link = $(event.item);
             var target = $(event.to);
-            // Le lien est un enfant
+            // Le lien est ou devient un enfant
             if (target.hasClass("navigation-links-children")) {
-                // Répercute le changement de navigationUid dans le champ caché
                 var parenUid = target.parent(".navigation-link").data("uid");
-                $("#navigation-uid-" + link.data("uid")).val(parenUid);
-                // Déplace les enfants et répercute le changement de navigationUid dans le champ caché
+                // Mise à jour du champ caché navigation-link-uid
+                $("[name='navigation-link-uid[" + link.data("uid") + "]']").val(parenUid);
+                // Mise à jour des enfants
                 link.find(".navigation-link").each(function () {
                     var child = $(this);
-                    $("#navigation-uid-" + child.data("uid")).val(parenUid);
+                    // Mise à jour du champ caché navigation-link-uid
+                    $("[name='navigation-link-uid[" + child.data("uid") + "]']").val(parenUid);
+                    // Déplace l'enfant au même niveau que son parent
                     child.appendTo(target);
                 });
-                // Désactive le tri des enfants
+                // Bloque l'ajout d'enfant au lien
                 link.children(".navigation-links-children").hide();
             }
-            // Le lien est un parent
+            // Le lien est ou devient un parent
             else {
-                // Répercute le changement de navigationUid dans le champ caché
-                $("#navigation-uid-" + link.data("uid")).val(0);
-                // Active le tri des enfants
+                // Mise à jour du champ caché navigation-link-uid
+                $("[name='navigation-link-uid[" + link.data("uid") + "]']").val(0);
+                // Autorise l'ajout d'enfant au lien
                 link.children(".navigation-links-children").show();
             }
         }
     });
 }
-sortable($("#navigation-links"));
+// Tri des liens parents
+sortable($("#navigation-links"), 0.02);
 
 // Ajout d'un lien
 var uid = 1;
 var idsUids = {};
 function addLink(link) {
-    // Ajoute l'id et l'uid du lien au tableau de relation id / uid
+    // Ajoute l'id et l'uid au tableau de relation id / uid
     if (link.id) {
         idsUids[link.id] = uid;
     }
-    // Ajoute l'id unique au lien
+    // Ajoute l'uid au lien
     link.uid = uid++;
-    // Ajoute le navigation uid
-    if (link.navigationId) {
-        link.navigationUid = idsUids[link.navigationId];
+    // Ajoute le l'uid du parent au lien
+    if (link.navigationLinkId) {
+        link.navigationLinkUid = idsUids[link.navigationLinkId];
     } else {
-        link.navigationUid = 0;
+        link.navigationLinkUid = 0;
     }
     // Crée le lien
     var linkDOM = $("<li>")
@@ -57,35 +61,47 @@ function addLink(link) {
         .append(
             $("<i>").addClass("fas fa-arrows-alt mr-3"),
             $("<span>").attr("id", "visible-title-" + link.uid).text(link.title),
-            $("<input>").attr({type: "hidden", id: "uid-" + link.uid, name: "uid[]", value: link.uid}),
-            $("<input>").attr({type: "hidden", id: "id-" + link.uid, name: "id[]", value: link.id}),
-            $("<input>").attr({type: "hidden", id: "title-" + link.uid, name: "title[]", value: link.title}),
-            $("<input>").attr({type: "hidden", id: "page-id-" + link.uid, name: "page-id[]", value: link.pageId}),
             $("<input>").attr({
                 type: "hidden",
-                id: "visibility-" + link.uid,
-                name: "visibility[]",
+                name: "id[" + link.uid + "]",
+                value: link.id
+            }),
+            $("<input>").attr({
+                type: "hidden",
+                name: "title[" + link.uid + "]",
+                value: link.title
+            }),
+            $("<input>").attr({
+                type: "hidden",
+                name: "page-id[" + link.uid + "]",
+                value: link.pageId
+            }),
+            $("<input>").attr({
+                type: "hidden",
+                name: "visibility[" + link.uid + "]",
                 value: link.visibility
             }),
-            $("<input>").attr({type: "hidden", id: "blank-" + link.uid, name: "blank[]", value: link.blank}),
             $("<input>").attr({
                 type: "hidden",
-                id: "navigation-uid-" + link.uid,
-                name: "navigation-uid[]",
-                value: link.navigationUid
+                name: "blank[" + link.uid + "]",
+                value: link.blank
             }),
-            $("<input>").attr({type: "hidden", id: "position-" + link.uid, name: "position[]", value: link.position}),
+            $("<input>").attr({
+                type: "hidden",
+                name: "navigation-link-uid[" + link.uid + "]",
+                value: link.navigationLinkUid
+            }),
             $("<ul>")
                 .addClass("list-group navigation-links-children")
-                // Désactive le tri pour les enfants du lien si il est lui même un enfant
-                .toggle(link.navigationUid === 0)
+                // Bloque l'ajout d'enfant au lien si il s'agit d'un enfant
+                .toggle(link.navigationLinkUid === 0)
         );
-    // Ajoute le tri au liens enfants
-    sortable(linkDOM.find(".navigation-links-children"));
+    // Tri des liens enfants
+    sortable(linkDOM.find(".navigation-links-children"), 0.9);
     // Ajoute le lien au DOM
     linkDOM.appendTo(
-        link.navigationId
-            ? ".navigation-link[data-uid=" + link.navigationUid + "] > .navigation-links-children"
+        link.navigationLinkId
+            ? ".navigation-link[data-uid=" + link.navigationLinkUid + "] > .navigation-links-children"
             : "#navigation-links"
     );
     // Sélectionne le premier lien ajouté
@@ -104,10 +120,10 @@ function selectLink(link) {
     // Affiche les champs d'éditions
     $("#navigation-link-fields.d-none").removeClass("d-none");
     // Mise à jour des champs d'édition
-    $("#edit-title").val($("#title-" + selectedUid).val());
-    $("#edit-page-id").val($("#page-id-" + selectedUid).val());
-    $("#edit-visibility-" + $("#visibility-" + selectedUid).val()).prop("checked", true);
-    $("#edit-blank").prop("checked", ($("#blank-" + selectedUid).val() === "true"));
+    $("#edit-title").val($("[name='title[" + selectedUid + "]']").val());
+    $("#edit-page-id").val($("[name='page-id[" + selectedUid + "]']").val());
+    $("#edit-visibility-" + $("[name='visibility[" + selectedUid + "]']").val()).prop("checked", true);
+    $("#edit-blank").prop("checked", ($("[name='blank[" + selectedUid + "]']").val() === "true"));
 }
 
 // Sélection d'un lien lors d'un clic dessus
@@ -118,10 +134,10 @@ $(document).on("click", ".navigation-link", function (event) {
 
 // Répercute les changements des champs d'édition dans le champs cachés
 $("#navigation-link-fields").on("change", function () {
-    $("#title-" + selectedUid).val($("#edit-title").val());
-    $("#page-id-" + selectedUid).val($("#edit-page-id").val());
-    $("#visibility-" + selectedUid).val($("[name=edit-visibility]:checked").val())
-    $("#blank-" + selectedUid).val($("#edit-blank").is(":checked"));
+    $("[name='title[" + selectedUid + "]']").val($("#edit-title").val());
+    $("[name='page-id[" + selectedUid + "]']").val($("#edit-page-id").val());
+    $("[name='visibility[" + selectedUid + "]']").val($("[name=edit-visibility]:checked").val())
+    $("[name='blank[" + selectedUid + "]']").val($("#edit-blank").is(":checked"));
 });
 
 // Répercute le changement des titres visibles en direct
@@ -129,14 +145,12 @@ $("#edit-title").on("keyup change", function () {
     $("#visible-title-" + selectedUid).text($(this).val());
 });
 
-// Ajout des liens au chargement
-<?php foreach ($this->navigations as $navigation): ?>
-<?php if($navigation->navigationId === 0): ?>
+// Crée les liens parents
+<?php foreach ($this->navigationLinksParents as $navigation): ?>
 addLink(<?php echo json_encode($navigation); ?>);
-<?php endif; ?>
 <?php endforeach; ?>
-<?php foreach ($this->navigations as $navigation): ?>
-<?php if($navigation->navigationId): ?>
+
+// Crée les liens enfants
+<?php foreach ($this->navigationLinksChildren as $navigation): ?>
 addLink(<?php echo json_encode($navigation); ?>);
-<?php endif; ?>
 <?php endforeach; ?>

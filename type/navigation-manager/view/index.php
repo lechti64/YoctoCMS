@@ -32,7 +32,7 @@
                         'class' => 'col-lg-3 col-form-label',
                     ]); ?>
                     <div class="col-lg-9">
-                        <?php echo $this->getTemplate()->select('edit-page-id', $this->pageOptions); ?>
+                        <?php echo $this->getTemplate()->select('edit-page-id', $this->pages); ?>
                     </div>
                 </div>
                 <div class="form-group row">

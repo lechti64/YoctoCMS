@@ -1,7 +1,7 @@
 {
     "columns": {
         "blank": "boolean",
-        "navigationId": "integer",
+        "navigationLinkId": "integer",
         "pageId": "integer",
         "position": "integer",
         "title": "string",

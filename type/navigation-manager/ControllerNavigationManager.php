@@ -5,19 +5,28 @@ namespace Yocto;
 class ControllerNavigationManager extends Controller
 {
 
-    /** @var array Items du menu de navigation */
-    public $navigations = [];
+    /** @var array Liens enfants */
+    public $navigationLinksChildren = [];
 
-    /** @var array Pages formatés pour le champ de sélection */
-    public $pageOptions = [];
+    /** @var array Liens parents */
+    public $navigationLinksParents = [];
+
+    /** @var array Pages */
+    public $pages = [];
 
     /** @var array Types de page */
     public $types = [];
 
     public function index()
     {
-        // Items du menu de navigation
-        $this->navigations = Database::instance('navigation')
+        // Liens enfants
+        $this->navigationLinksChildren = Database::instance('navigation-link')
+            ->where('navigationLinkId', '!=', 0)
+            ->orderBy('position', 'ASC')
+            ->findAll();
+        // Liens enfants
+        $this->navigationLinksParents = Database::instance('navigation-link')
+            ->where('navigationLinkId', '=', 0)
             ->orderBy('position', 'ASC')
             ->findAll();
         // Pages
@@ -25,7 +34,7 @@ class ControllerNavigationManager extends Controller
             ->orderBy('title', 'ASC')
             ->findAll();
         foreach ($pages as $page) {
-            $this->pageOptions[$page->id] = $page->title;
+            $this->pages[$page->id] = $page->title;
         }
         // Types de page
         $this->types = array_diff(scandir(ROOT . '/type'), array('.', '..'));
@@ -39,43 +48,43 @@ class ControllerNavigationManager extends Controller
     public function save()
     {
         $uidsIds = [];
-        if ($uids = $this->get('uid')) {
+        if ($ids = $this->get('id')) {
             $blanks = $this->get('blank');
-            $ids = $this->get('id');
-            $navigationUids = $this->get('navigation-uid');
+            $navigationLinkUids = $this->get('navigation-link-uid');
             $pageIds = $this->get('page-id');
             $titles = $this->get('title');
             $visibilities = $this->get('visibility');
             // Enregistre les liens parents
             $position = 0;
-            foreach ($uids as $index => $uid) {
-                if ((int)$navigationUids[$index] === 0) {
-                    $row = Database::instance('navigation')
-                        ->where('id', '=', (int)$ids[$index])
+            foreach ($ids as $uid => $id) {
+                if ((int)$navigationLinkUids[$uid] === 0) {
+                    $row = Database::instance('navigation-link')
+                        ->where('id', '=', (int)$ids[$uid])
                         ->find();
-                    $row->blank = $blanks[$index];
-                    $row->navigationId = 0;
-                    $row->pageId = $pageIds[$index];
+                    $row->blank = $blanks[$uid];
+                    $row->navigationLinkId = 0;
+                    $row->pageId = $pageIds[$uid];
                     $row->position = $position++;
-                    $row->title = $titles[$index];
-                    $row->visibility = $visibilities[$index];
+                    $row->title = $titles[$uid];
+                    $row->visibility = $visibilities[$uid];
                     $row->save();
-                    $uidsIds[$uid] = $ids[$index];
+                    $uidsIds[$uid] = $row->id;
                 }
             }
             // Enregistre les liens enfants
+            // TODO: Ce système de position n'est pas top
             $position = 0;
-            foreach ($uids as $index => $uid) {
-                if ((int)$navigationUids[$index]) {
-                    $row = Database::instance('navigation')
-                        ->where('id', '=', (int)$ids[$index])
+            foreach ($ids as $uid => $id) {
+                if ((int)$navigationLinkUids[$uid]) {
+                    $row = Database::instance('navigation-link')
+                        ->where('id', '=', (int)$ids[$uid])
                         ->find();
-                    $row->blank = $blanks[$index];
-                    $row->navigationId = $uidsIds[$navigationUids[$index]];
-                    $row->pageId = $pageIds[$index];
-                    $row->position = $position++;
-                    $row->title = $titles[$index];
-                    $row->visibility = $visibilities[$index];
+                    $row->blank = $blanks[$uid];
+                    $row->navigationLinkId = $uidsIds[$navigationLinkUids[$uid]];
+                    $row->pageId = $pageIds[$uid];
+                    $row->position = $position;
+                    $row->title = $titles[$uid];
+                    $row->visibility = $visibilities[$uid];
                     $row->save();
                 }
             }

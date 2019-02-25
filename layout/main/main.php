@@ -26,31 +26,31 @@
         <a class="navigation__title" href="./"><?php echo $this->_configuration->title; ?></a>
         <ul class="navigation__items">
             <?php
-            $navigations = Yocto\Database::instance('navigation')
-                ->where('navigationId', '=', 0)
+            $navigationLinks = Yocto\Database::instance('navigation-link')
+                ->where('navigationLinkId', '=', 0)
                 ->orderBy('position', 'ASC')
                 ->findAll();
             ?>
-            <?php foreach ($navigations as $navigation): ?>
+            <?php foreach ($navigationLinks as $navigationLink): ?>
                 <li class="navigation__item">
-                    <a class="navigation__link <?php if ($this->_page->id === $navigation->id): ?>navigation__link--active<?php endif; ?>"
-                       href="?pageId=<?php echo $navigation->pageId; ?>">
-                        <?php echo $navigation->title; ?>
+                    <a class="navigation__link <?php if ($this->_page->id === $navigationLink->id): ?>navigation__link--active<?php endif; ?>"
+                       href="?pageId=<?php echo $navigationLink->pageId; ?>">
+                        <?php echo $navigationLink->title; ?>
                     </a>
                     <?php
-                    $subNavigations = Yocto\Database::instance('navigation')
-                        ->where('navigationId', '=', $navigation->id)
+                    $subNavigationLinks = Yocto\Database::instance('navigation-link')
+                        ->where('navigationLinkId', '=', $navigationLink->id)
                         ->orderBy('position', 'ASC')
                         ->findAll();
                     ?>
-                    <?php if ($subNavigations): ?>
+                    <?php if ($subNavigationLinks): ?>
                         <div class="navigation__sub-navigation">
                             <ul class="navigation__sub-items container">
-                                <?php foreach ($subNavigations as $subNavigation): ?>
+                                <?php foreach ($subNavigationLinks as $subNavigationLink): ?>
                                     <li class="navigation__item">
-                                        <a class="navigation__link <?php if ($this->_page->id === $subNavigation->id): ?>navigation__link--active<?php endif; ?>"
-                                           href="?pageId=<?php echo $subNavigation->pageId; ?>">
-                                            <?php echo $subNavigation->title; ?>
+                                        <a class="navigation__link <?php if ($this->_page->id === $subNavigationLink->id): ?>navigation__link--active<?php endif; ?>"
+                                           href="?pageId=<?php echo $subNavigationLink->pageId; ?>">
+                                            <?php echo $subNavigationLink->title; ?>
                                         </a>
                                     </li>
                                 <?php endforeach; ?>
