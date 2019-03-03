@@ -312,9 +312,9 @@ echo $this->getForm()->label('id-du-champ-rattaché', 'Label du champ');
 
 ```php
 echo $this->getForm()->input('id-du-champ', [
-    'label' => 'Adresse email',
     'type' => 'email',
     'value' => 'email@yoctocms.com',
+    'class' => 'une-classe',
 ]);
 ```
 
@@ -326,7 +326,7 @@ echo $this->getForm()->input('id-du-champ', [
 
 ```php
 echo $this->getForm()->textarea('id-du-champ', 'Un commentaire', [
-    'label' => 'Commentaire',
+    'class' => 'une-classe',
 ]);
 ```
 

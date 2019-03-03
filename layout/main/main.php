@@ -38,7 +38,7 @@
                 <?php if ($this->getSession()->isVisible($navigationLink)): ?>
                     <li class="navigation__item">
                         <a class="navigation__link <?php if ($this->_page->id === $navigationLink->id): ?>navigation__link--active<?php endif; ?>"
-                           href="<?php if ($pageId = $navigationLink->pageId): ?>?pageId=<?php echo $navigationLink->pageId; ?><?php else: ?>javascript:void(0);<?php endif; ?>">
+                           href="<?php if ($pageId = $navigationLink->pageId): ?>?pageId=<?php echo $navigationLink->pageId; ?><?php else: ?>javascript:;<?php endif; ?>">
                             <?php if ($icon = $navigationLink->icon): ?>
                                 <i class="<?php echo $icon; ?><?php if ($navigationLink->title): ?> mr-1<?php endif; ?>"></i>
                             <?php endif; ?>
@@ -57,7 +57,7 @@
                                         <?php if ($this->getSession()->isVisible($subNavigationLink)): ?>
                                             <li class="navigation__item">
                                                 <a class="navigation__link <?php if ($this->_page->id === $subNavigationLink->id): ?>navigation__link--active<?php endif; ?>"
-                                                   href="<?php if ($pageId = $subNavigationLink->pageId): ?>?pageId=<?php echo $subNavigationLink->pageId; ?><?php else: ?>javascript:void(0);<?php endif; ?>">
+                                                   href="<?php if ($pageId = $subNavigationLink->pageId): ?>?pageId=<?php echo $subNavigationLink->pageId; ?><?php else: ?>javascript:;<?php endif; ?>">
                                                     <?php if ($icon = $subNavigationLink->icon): ?>
                                                         <i class="<?php echo $icon; ?><?php if ($subNavigationLink->title): ?> mr-1<?php endif; ?>"></i>
                                                     <?php endif; ?>
