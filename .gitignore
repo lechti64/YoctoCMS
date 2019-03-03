@@ -1,5 +1,6 @@
 # Base de données
 content/
+!content/default.json
 # Composer
 composer.phar
 # PhpStorm

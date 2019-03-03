@@ -300,28 +300,18 @@ Database::instance('nom-de-table")->delete();
 
 [Voir la documentation de Bootstrap](https://getbootstrap.com/docs/4.3/getting-started/introduction/)
 
-### Bouton
+### Formulaire
+
+#### Label
 
 ```php
-echo $this->getTemplate()->button('Valider', [
-    'type' => 'submit',
-]);
+echo $this->getForm()->label('id-du-champ-rattaché', 'Label du champ');
 ```
 
-##### Attributs
-
-- [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Button#Attributs)
-
-### Label
+#### Champ court
 
 ```php
-echo $this->getTemplate()->label('id-du-champ-rattaché', 'Label du champ');
-```
-
-### Champ court
-
-```php
-echo $this->getTemplate()->input('id-du-champ', [
+echo $this->getForm()->input('id-du-champ', [
     'label' => 'Adresse email',
     'type' => 'email',
     'value' => 'email@yoctocms.com',
@@ -332,10 +322,10 @@ echo $this->getTemplate()->input('id-du-champ', [
 
 - [Voir la documentation de Mozilla](https://developer.mozilla.org/fr/docs/Web/HTML/Element/Input#Attributs)
 
-### Champ long
+#### Champ long
 
 ```php
-echo $this->getTemplate()->textarea('id-du-champ', 'Un commentaire', [
+echo $this->getForm()->textarea('id-du-champ', 'Un commentaire', [
     'label' => 'Commentaire',
 ]);
 ```
@@ -433,26 +423,24 @@ class ControllerExample extends Controller
 ```html
 <form method="post">
     <div class="form-group">
-        <?php echo $this->getTemplate()->label('title', 'Titre de la page'); ?>
-        <?php echo $this->getTemplate()->input('title', [
+        <?php echo $this->getForm()->label('title', 'Titre de la page'); ?>
+        <?php echo $this->getForm()->input('title', [
             'value' => $this->_page->title,
         ]); ?>
     </div>
     <div class="form-group">
-        <?php echo $this->getTemplate()->label('foo', 'Foo'); ?>
-        <?php echo $this->getTemplate()->input('foo', [
+        <?php echo $this->getForm()->label('foo', 'Foo'); ?>
+        <?php echo $this->getForm()->input('foo', [
             'value' => $this->_type->foo,
         ]); ?>
     </div>
     <div class="form-group">
-        <?php echo $this->getTemplate()->label('bar', 'Bar'); ?>
-        <?php echo $this->getTemplate()->input('bar', [
+        <?php echo $this->getForm()->label('bar', 'Bar'); ?>
+        <?php echo $this->getForm()->input('bar', [
             'value' => $this->_type->bar,
         ]); ?>
     </div>
-    <?php echo $this->getTemplate()->button('Valider', [
-        'type' => 'submit',
-    ]); ?>
+    <button type="submit" class="btn btn-primary">Valider</button>
 </form>
 ```
 

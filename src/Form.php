@@ -2,7 +2,7 @@
 
 namespace Yocto;
 
-class Template
+class Form
 {
 
     /** @var Controller Contrôleur en provenance de ./src/Controller.php */
@@ -15,28 +15,6 @@ class Template
     public function __construct($controller)
     {
         $this->controller = $controller;
-    }
-
-    /**
-     * Crée un bouton
-     * @param string $text Texte de l'élément
-     * @param array $attributes Attributs de l'élément ($key => $value)
-     * @return string
-     */
-    public function button($text, array $attributes = [])
-    {
-        // Attributs par défaut
-        $attributes = array_merge([
-            'class' => 'btn-primary',
-            'type' => 'button',
-        ], $attributes);
-        $attributes['class'] .= ' btn';
-        // Retourne l'élément
-        return sprintf(
-            '<button %s>%s</button>',
-            $this->sprintAttributes($attributes),
-            $text
-        );
     }
 
     /**

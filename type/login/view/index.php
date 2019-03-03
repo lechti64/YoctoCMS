@@ -1,15 +1,13 @@
 <form method="post">
     <div class="form-group">
-        <?php echo $this->getTemplate()->label('username', 'Identifiant'); ?>
-        <?php echo $this->getTemplate()->input('username'); ?>
+        <?php echo $this->getForm()->label('username', 'Identifiant'); ?>
+        <?php echo $this->getForm()->input('username'); ?>
     </div>
     <div class="form-group">
-        <?php echo $this->getTemplate()->label('password', 'Mot de passe'); ?>
-        <?php echo $this->getTemplate()->input('password', [
+        <?php echo $this->getForm()->label('password', 'Mot de passe'); ?>
+        <?php echo $this->getForm()->input('password', [
             'type' => 'password',
         ]); ?>
     </div>
-    <?php echo $this->getTemplate()->button('Se connecter', [
-        'type' => 'submit',
-    ]); ?>
+    <button type="submit" class="btn btn-primary">Se connecter</button>
 </form>

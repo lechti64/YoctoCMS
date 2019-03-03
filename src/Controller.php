@@ -29,8 +29,8 @@ class Controller
     /** @var array Notices */
     private $notices = [];
 
-    /** @var Template Template */
-    private $template;
+    /** @var Form Formulaire */
+    private $form;
 
     /** @var array Librairies */
     private $vendors = [];
@@ -51,8 +51,8 @@ class Controller
         $this->_configuration = $_configuration;
         $this->_page = $_page;
         $this->_type = $_type;
-        // Crée l'instance du template
-        $this->template = new Template($this);
+        // Crée l'instance du formulaire
+        $this->form = new Form($this);
         // Ajoute les méthodes HTTP
         $this->methods = [
             'POST' => $_POST,
@@ -125,11 +125,11 @@ class Controller
     }
 
     /**
-     * Accès au template
+     * Accès au formulaire
      */
-    public function getTemplate()
+    public function getForm()
     {
-        return $this->template;
+        return $this->form;
     }
 
     /**
