@@ -35,38 +35,42 @@
                 ->findAll();
             ?>
             <?php foreach ($navigationLinks as $navigationLink): ?>
-                <li class="navigation__item">
-                    <a class="navigation__link <?php if ($this->_page->id === $navigationLink->id): ?>navigation__link--active<?php endif; ?>"
-                       href="<?php if ($pageId = $navigationLink->pageId): ?>?pageId=<?php echo $navigationLink->pageId; ?><?php else: ?>javascript:void(0);<?php endif; ?>">
-                        <?php if ($icon = $navigationLink->icon): ?>
-                            <i class="<?php echo $icon; ?><?php if ($navigationLink->title): ?> mr-1<?php endif; ?>"></i>
+                <?php if ($this->getSession()->isVisible($navigationLink)): ?>
+                    <li class="navigation__item">
+                        <a class="navigation__link <?php if ($this->_page->id === $navigationLink->id): ?>navigation__link--active<?php endif; ?>"
+                           href="<?php if ($pageId = $navigationLink->pageId): ?>?pageId=<?php echo $navigationLink->pageId; ?><?php else: ?>javascript:void(0);<?php endif; ?>">
+                            <?php if ($icon = $navigationLink->icon): ?>
+                                <i class="<?php echo $icon; ?><?php if ($navigationLink->title): ?> mr-1<?php endif; ?>"></i>
+                            <?php endif; ?>
+                            <?php echo $navigationLink->title; ?>
+                        </a>
+                        <?php
+                        $subNavigationLinks = Yocto\Database::instance('navigation-link')
+                            ->where('navigationLinkId', '=', $navigationLink->id)
+                            ->orderBy('position', 'ASC')
+                            ->findAll();
+                        ?>
+                        <?php if ($subNavigationLinks): ?>
+                            <div class="navigation__sub-navigation">
+                                <ul class="navigation__sub-items container">
+                                    <?php foreach ($subNavigationLinks as $subNavigationLink): ?>
+                                        <?php if ($this->getSession()->isVisible($subNavigationLink)): ?>
+                                            <li class="navigation__item">
+                                                <a class="navigation__link <?php if ($this->_page->id === $subNavigationLink->id): ?>navigation__link--active<?php endif; ?>"
+                                                   href="<?php if ($pageId = $subNavigationLink->pageId): ?>?pageId=<?php echo $subNavigationLink->pageId; ?><?php else: ?>javascript:void(0);<?php endif; ?>">
+                                                    <?php if ($icon = $subNavigationLink->icon): ?>
+                                                        <i class="<?php echo $icon; ?><?php if ($subNavigationLink->title): ?> mr-1<?php endif; ?>"></i>
+                                                    <?php endif; ?>
+                                                    <?php echo $subNavigationLink->title; ?>
+                                                </a>
+                                            </li>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
                         <?php endif; ?>
-                        <?php echo $navigationLink->title; ?>
-                    </a>
-                    <?php
-                    $subNavigationLinks = Yocto\Database::instance('navigation-link')
-                        ->where('navigationLinkId', '=', $navigationLink->id)
-                        ->orderBy('position', 'ASC')
-                        ->findAll();
-                    ?>
-                    <?php if ($subNavigationLinks): ?>
-                        <div class="navigation__sub-navigation">
-                            <ul class="navigation__sub-items container">
-                                <?php foreach ($subNavigationLinks as $subNavigationLink): ?>
-                                    <li class="navigation__item">
-                                        <a class="navigation__link <?php if ($this->_page->id === $subNavigationLink->id): ?>navigation__link--active<?php endif; ?>"
-                                           href="<?php if ($pageId = $subNavigationLink->pageId): ?>?pageId=<?php echo $subNavigationLink->pageId; ?><?php else: ?>javascript:void(0);<?php endif; ?>">
-                                            <?php if ($icon = $subNavigationLink->icon): ?>
-                                                <i class="<?php echo $icon; ?><?php if ($subNavigationLink->title): ?> mr-1<?php endif; ?>"></i>
-                                            <?php endif; ?>
-                                            <?php echo $subNavigationLink->title; ?>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    <?php endif; ?>
-                </li>
+                    </li>
+                <?php endif; ?>
             <?php endforeach; ?>
         </ul>
     </div>

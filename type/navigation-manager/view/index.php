@@ -58,16 +58,20 @@
                         ]); ?>
                         <div class="col-lg-9">
                             <?php echo $this->getForm()->radio('edit-visibility', 'Hériter de la page', [
-                                'id' => 'edit-visibility-inherit',
-                                'value' => 'inherit',
+                                'id' => 'edit-visibility-' . Yocto\Session::VISIBILITY_INHERIT,
+                                'value' => Yocto\Session::VISIBILITY_INHERIT,
                             ]); ?>
                             <?php echo $this->getForm()->radio('edit-visibility', 'Publique', [
-                                'id' => 'edit-visibility-public',
-                                'value' => 'public',
+                                'id' => 'edit-visibility-' . Yocto\Session::VISIBILITY_PUBLIC,
+                                'value' => Yocto\Session::VISIBILITY_PUBLIC,
+                            ]); ?>
+                            <?php echo $this->getForm()->radio('edit-visibility', 'Publique seulement', [
+                                'id' => 'edit-visibility-' . Yocto\Session::VISIBILITY_PUBLIC_ONLY,
+                                'value' => Yocto\Session::VISIBILITY_PUBLIC_ONLY,
                             ]); ?>
                             <?php echo $this->getForm()->radio('edit-visibility', 'Privée', [
-                                'id' => 'edit-visibility-private',
-                                'value' => 'private',
+                                'id' => 'edit-visibility-' . Yocto\Session::VISIBILITY_PRIVATE,
+                                'value' => Yocto\Session::VISIBILITY_PRIVATE,
                             ]); ?>
                         </div>
                     </div>

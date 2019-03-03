@@ -20,6 +20,9 @@ class Controller
         'type' => '',
     ];
 
+    /** @var Form Formulaire */
+    private $form;
+
     /** @var string Layout */
     private $layout;
 
@@ -29,8 +32,8 @@ class Controller
     /** @var array Notices */
     private $notices = [];
 
-    /** @var Form Formulaire */
-    private $form;
+    /** @var Session Session */
+    private $session;
 
     /** @var array Librairies */
     private $vendors = [];
@@ -51,6 +54,8 @@ class Controller
         $this->_configuration = $_configuration;
         $this->_page = $_page;
         $this->_type = $_type;
+        // Crée l'instance de la session
+        $this->session = new Session($this);
         // Crée l'instance du formulaire
         $this->form = new Form($this);
         // Ajoute les méthodes HTTP
@@ -111,6 +116,14 @@ class Controller
     }
 
     /**
+     * Accès au formulaire
+     */
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    /**
      * Accès à une ou aux notices
      * @param null $key Clé à rechercher
      * @return array|string
@@ -125,11 +138,11 @@ class Controller
     }
 
     /**
-     * Accès au formulaire
+     * Accès à la session
      */
-    public function getForm()
+    public function getSession()
     {
-        return $this->form;
+        return $this->session;
     }
 
     /**

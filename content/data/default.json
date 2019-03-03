@@ -43,7 +43,7 @@
             "pageId": 0,
             "position": 3,
             "title": "",
-            "visibility": "inherit"
+            "visibility": "private"
         },
         {
             "blank": false,
@@ -58,19 +58,23 @@
     "page": [
         {
             "title": "Accueil",
-            "type": "static"
+            "type": "static",
+            "visibility": "public"
         },
         {
             "title": "Exemple",
-            "type": "static"
+            "type": "static",
+            "visibility": "public"
         },
         {
             "title": "Connexion",
-            "type": "login"
+            "type": "login",
+            "visibility": "public-only"
         },
         {
             "title": "Gestion du menu",
-            "type": "navigation-manager"
+            "type": "navigation-manager",
+            "visibility": "private"
         }
     ],
     "page-login": [

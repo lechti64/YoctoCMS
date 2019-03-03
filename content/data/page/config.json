@@ -1,7 +1,8 @@
 {
     "columns": {
         "title": "string",
-        "type": "string"
+        "type": "string",
+        "visibility": "string"
     },
     "increment": 1
 }
