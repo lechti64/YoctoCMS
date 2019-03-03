@@ -2,6 +2,10 @@
     cursor: pointer;
 }
 
-.navigation-links-children :first-child {
-    margin-top: .5rem;
+.navigation-link-inner {
+    min-height: 1.5rem;
+}
+
+.navigation-links-children > :first-child {
+    margin-top: .75rem;
 }

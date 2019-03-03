@@ -59,9 +59,23 @@ function addLink(link, prepend) {
         .attr("data-uid", link.uid)
         .addClass("navigation-link list-group-item list-group-item-action")
         .append(
-            $("<i>").addClass("fas fa-arrows-alt mr-3"),
-            $("<i>").attr("id", "visible-icon-" + link.uid).addClass(link.icon ? link.icon + " mr-2" : ""),
-            $("<span>").attr("id", "visible-title-" + link.uid).text(link.title),
+            $("<div>")
+                .addClass("navigation-link-inner d-flex align-items-center")
+                .append(
+                    $("<i>").addClass("fas fa-arrows-alt mr-3"),
+                    $("<i>")
+                        .addClass(link.icon ? link.icon + " mr-2" : "")
+                        .attr("id", "visible-icon-" + link.uid),
+                    $("<span>")
+                        .addClass("mr-3")
+                        .attr("id", "visible-title-" + link.uid).text(link.title),
+                    ($("<i>")
+                        .addClass("fas fa-times ml-auto"))
+                        .attr({
+                            "data-toggle": "modal",
+                            "data-target": "#delete-modal"
+                        })
+                ),
             $("<input>").attr({
                 type: "hidden",
                 name: "id[" + link.uid + "]",
@@ -158,7 +172,7 @@ $("#edit-icon-dropdown-toggle")
     .iconpicker({
         animation: false,
         templates: {
-            search: '<input type="search" class="form-control iconpicker-search" placeholder="Rechercher" />'
+            search: '<input type="search" class="form-control iconpicker-search" placeholder="Rechercher..." />'
         }
     })
     .on("iconpickerSelected", function (event) {
