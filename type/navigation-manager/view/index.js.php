@@ -147,8 +147,9 @@ function selectLink(link) {
     // Mise à jour des champs d'édition
     $("#edit-title").val($("[name='title[" + selectedUid + "]']").val());
     $("#edit-page-id").val($("[name='page-id[" + selectedUid + "]']").val());
-    $("#edit-visibility-" + $("[name='visibility[" + selectedUid + "]']").val()).prop("checked", true);
     $("#edit-blank").prop("checked", ($("[name='blank[" + selectedUid + "]']").val() === "true"));
+    visibilityInheritDisabledToggle();
+    $("#edit-visibility-" + $("[name='visibility[" + selectedUid + "]']").val()).prop("checked", true);
     // Sélectionne l'icône
     resetIconPicker();
     var icon = $("[name='icon[" + selectedUid + "]']").val();
@@ -167,6 +168,53 @@ function resetIconPicker() {
     $("#edit-icon-delete").prop("disabled", true);
 }
 
+// Active / Désactive la visibilité inherit
+function visibilityInheritDisabledToggle() {
+    var visibilityInherit = $("#edit-visibility-<?php echo Yocto\Session::VISIBILITY_INHERIT; ?>");
+    if ($("[name='page-id[" + selectedUid + "]']").val() === "0") {
+        visibilityInherit.prop("disabled", true);
+        if (visibilityInherit.is(":checked")) {
+            $("#edit-visibility-<?php echo Yocto\Session::VISIBILITY_PUBLIC; ?>").prop("checked", true);
+        }
+    } else {
+        visibilityInherit.prop("disabled", false);
+    }
+}
+
+// Sélectionne un lien lors d'un clic
+$(document).on("click", ".navigation-link", function (event) {
+    selectLink($(this));
+    event.stopPropagation();
+});
+
+// Ajoute un lien
+$("#add").on("click", function () {
+    // Ajoute le lien
+    addLink({
+        pageId: 0,
+        title: "Nouveau lien",
+        visibility: "inherit"
+    }, true);
+    selectLink($(".navigation-link").first())
+    // Ferme le modal
+    $('#add-modal').modal('hide');
+});
+
+// Supprime un lien
+$("#delete-modal-submit").on("click", function () {
+    // Supprime le lien
+    $(".navigation-link[data-uid=" + selectedUid + "]").remove();
+    selectedUid = undefined;
+    // Cache les champs d'éditions
+    $("#navigation-link-fields").addClass("d-none");
+    var links = $(".navigation-link");
+    if (links.length) {
+        selectLink(links.first())
+    }
+    // Ferme le modal
+    $('#delete-modal').modal('hide');
+});
+
 // Sélecteur d'icône
 $("#edit-icon-dropdown-toggle")
     .iconpicker({
@@ -180,63 +228,29 @@ $("#edit-icon-dropdown-toggle")
         $("#edit-icon-delete").prop("disabled", false);
     });
 
-// Suppression d'un icône
+// Supprime l'icône sélectionné
 $("#edit-icon-delete").on("click", function () {
     resetIconPicker();
     $("#edit-icon").trigger("change");
-});
-
-// Sélection d'un lien lors d'un clic dessus
-$(document).on("click", ".navigation-link", function (event) {
-    selectLink($(this));
-    event.stopPropagation();
 });
 
 // Répercute les changements des champs d'édition dans le champs cachés
 $("#navigation-link-fields").on("change", function () {
     $("[name='title[" + selectedUid + "]']").val($("#edit-title").val());
     $("[name='page-id[" + selectedUid + "]']").val($("#edit-page-id").val());
-    $("[name='visibility[" + selectedUid + "]']").val($("[name=edit-visibility]:checked").val())
     $("[name='blank[" + selectedUid + "]']").val($("#edit-blank").is(":checked"));
     $("[name='icon[" + selectedUid + "]']").val($("#edit-icon").val());
+    visibilityInheritDisabledToggle();
+    $("[name='visibility[" + selectedUid + "]']").val($("[name=edit-visibility]:checked").val())
 });
 
-// Répercute le changement des titres visibles en direct
+// Répercute le changement des titres / icônes visibles en direct
 $("#edit-title").on("keyup change", function () {
     $("#visible-title-" + selectedUid).text($(this).val());
 });
-// Répercute le changement des icônes visibles en direct
 $("#edit-icon").on("change", function () {
     var icon = $(this).val();
     $("#visible-icon-" + selectedUid).attr("class", icon ? icon + " mr-2" : "");
-});
-
-// Ajout d'un lien
-$("#add").on("click", function () {
-    // Ajoute le lien
-    addLink({
-        pageId: 0,
-        title: "Nouveau lien",
-        visibility: "inherit"
-    }, true);
-    selectLink($(".navigation-link").first())
-    // Ferme le modal
-    $('#add-modal').modal('hide');
-});
-
-// Suppression d'un lien
-$("#delete-modal-submit").on("click", function () {
-    // Supprime le lien
-    $(".navigation-link[data-uid=" + selectedUid + "]").remove();
-    selectedUid = undefined;
-    // Cache les champs d'éditions
-    $("#navigation-link-fields").addClass("d-none");
-    var links = $(".navigation-link");
-    if (links.length) {
-        selectLink(links.first())
-    }
-    // Ferme le modal
-    $('#delete-modal').modal('hide');
 });
 
 // Ajoute les liens parents
