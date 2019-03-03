@@ -136,7 +136,7 @@
     font-size: 14px;
     text-align: center;
     padding: 50px 0;
-    border-top: 1px solid #efefef;
+    border-top: 1px solid rgba(0, 0, 0, .125);
 }
 
 .footer a {
