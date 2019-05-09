@@ -118,7 +118,7 @@ class ControllerNavigationManager extends Controller
             $this->setAlert('Modifications enregistrées.');
         } else {
             // Alerte
-            $this->setAlert('La navigation doit comporter un lien au minimum.', 'danger');
+            $this->setAlert('Le menu doit comporter un lien au minimum.', 'danger');
         }
 
         // Affichage

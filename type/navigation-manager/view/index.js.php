@@ -144,8 +144,8 @@ function selectLink($link) {
     $("#edit-title").val($("[name='title[" + selectedUid + "]']").val());
     $("#edit-page-id").val($("[name='page-id[" + selectedUid + "]']").val());
     $("#edit-blank").prop("checked", ($("[name='blank[" + selectedUid + "]']").val() === "true"));
-    visibilityInheritDisabledToggle();
     $("#edit-visibility-" + $("[name='visibility[" + selectedUid + "]']").val()).prop("checked", true);
+    visibilityInheritDisabledToggle();
     // Sélectionne l'icône
     resetIconPicker();
     const icon = $("[name='icon[" + selectedUid + "]']").val();
@@ -168,10 +168,10 @@ function resetIconPicker() {
 function visibilityInheritDisabledToggle() {
     const $visibilityInherit = $("#edit-visibility-<?php echo Yocto\Session::VISIBILITY_INHERIT; ?>");
     if ($("[name='page-id[" + selectedUid + "]']").val() === "0") {
-        $visibilityInherit.prop("disabled", true);
         if ($visibilityInherit.is(":checked")) {
             $("#edit-visibility-<?php echo Yocto\Session::VISIBILITY_PUBLIC; ?>").prop("checked", true);
         }
+        $visibilityInherit.prop("disabled", true);
     } else {
         $visibilityInherit.prop("disabled", false);
     }
@@ -236,8 +236,8 @@ $("#navigation-link-fields").on("change", function () {
     $("[name='page-id[" + selectedUid + "]']").val($("#edit-page-id").val());
     $("[name='blank[" + selectedUid + "]']").val($("#edit-blank").is(":checked"));
     $("[name='icon[" + selectedUid + "]']").val($("#edit-icon").val());
-    visibilityInheritDisabledToggle();
     $("[name='visibility[" + selectedUid + "]']").val($("[name=edit-visibility]:checked").val())
+    visibilityInheritDisabledToggle();
 });
 
 // Répercute le changement des titres / icônes visibles en direct
