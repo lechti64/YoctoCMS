@@ -7,30 +7,30 @@ function sortable(container, swapThreshold) {
         invertSwap: true,
         dragoverBubble: true,
         onEnd: function (event) {
-            var link = $(event.item);
-            var target = $(event.to);
-            // Le lien est ou devient un enfant
-            if (target.hasClass("navigation-links-children")) {
-                var parenUid = target.parent(".navigation-link").data("uid");
-                // Mise à jour du champ caché navigation-link-uid
-                $("[name='navigation-link-uid[" + link.data("uid") + "]']").val(parenUid);
-                // Mise à jour des enfants
-                link.find(".navigation-link").each(function () {
-                    var child = $(this);
-                    // Mise à jour du champ caché navigation-link-uid
-                    $("[name='navigation-link-uid[" + child.data("uid") + "]']").val(parenUid);
-                    // Déplace l'enfant au même niveau que son parent
-                    child.appendTo(target);
+            const $link = $(event.item);
+            const $linkContainer = $(event.to);
+            // Le lien est un enfant
+            if ($linkContainer.hasClass("navigation-links-children")) {
+                const linkContainerUid = $linkContainer.parent(".navigation-link").data("uid");
+                // Mise à jour du champ caché navigation-link-uid du lien
+                $("[name='navigation-link-uid[" + $link.data("uid") + "]']").val(linkContainerUid);
+                // Mise à jour des enfants du lien
+                $link.find(".navigation-link").each(function () {
+                    const $child = $(this);
+                    // Mise à jour du champ caché navigation-link-uid des enfants
+                    $("[name='navigation-link-uid[" + $child.data("uid") + "]']").val(linkContainerUid);
+                    // Déplace l'enfant au même niveau que le parent
+                    $child.appendTo($linkContainer);
                 });
                 // Bloque l'ajout d'enfant au lien
-                link.children(".navigation-links-children").hide();
+                $link.children(".navigation-links-children").hide();
             }
-            // Le lien est ou devient un parent
+            // Le lien est un parent
             else {
-                // Mise à jour du champ caché navigation-link-uid
-                $("[name='navigation-link-uid[" + link.data("uid") + "]']").val(0);
+                // Mise à jour du champ caché navigation-link-uid du lien
+                $("[name='navigation-link-uid[" + $link.data("uid") + "]']").val(0);
                 // Autorise l'ajout d'enfant au lien
-                link.children(".navigation-links-children").show();
+                $link.children(".navigation-links-children").show();
             }
         }
     });
@@ -39,8 +39,8 @@ function sortable(container, swapThreshold) {
 sortable($("#navigation-links"), 0.02);
 
 // Ajout d'un lien
-var uid = 1;
-var idsUids = {};
+let uid = 1;
+let idsUids = {};
 function addLink(link, prepend) {
     // Ajoute l'id et l'uid au tableau de relation id / uid
     if (link.id) {
@@ -49,99 +49,95 @@ function addLink(link, prepend) {
     // Ajoute l'uid au lien
     link.uid = uid++;
     // Ajoute le l'uid du parent au lien
-    if (link.navigationLinkId) {
-        link.navigationLinkUid = idsUids[link.navigationLinkId];
-    } else {
-        link.navigationLinkUid = 0;
-    }
+    link.navigationLinkUid = link.navigationLinkId
+        ? idsUids[link.navigationLinkId]
+        : 0;
     // Crée le lien
-    var linkDOM = $("<li>")
-        .attr("data-uid", link.uid)
-        .addClass("navigation-link list-group-item list-group-item-action")
-        .append(
-            $("<div>")
-                .addClass("navigation-link-inner d-flex align-items-center")
-                .append(
-                    $("<i>").addClass("fas fa-arrows-alt mr-3"),
-                    $("<i>")
-                        .addClass(link.icon ? link.icon + " mr-2" : "")
-                        .attr("id", "visible-icon-" + link.uid),
-                    $("<span>")
-                        .addClass("mr-3")
-                        .attr("id", "visible-title-" + link.uid).text(link.title),
-                    ($("<i>")
-                        .addClass("fas fa-times ml-auto"))
-                        .attr({
-                            "data-toggle": "modal",
-                            "data-target": "#delete-modal"
-                        })
-                ),
-            $("<input>").attr({
-                type: "hidden",
-                name: "id[" + link.uid + "]",
-                value: link.id
-            }),
-            $("<input>").attr({
-                type: "hidden",
-                name: "icon[" + link.uid + "]",
-                value: link.icon
-            }),
-            $("<input>").attr({
-                type: "hidden",
-                name: "title[" + link.uid + "]",
-                value: link.title
-            }),
-            $("<input>").attr({
-                type: "hidden",
-                name: "page-id[" + link.uid + "]",
-                value: link.pageId
-            }),
-            $("<input>").attr({
-                type: "hidden",
-                name: "visibility[" + link.uid + "]",
-                value: link.visibility
-            }),
-            $("<input>").attr({
-                type: "hidden",
-                name: "blank[" + link.uid + "]",
-                value: link.blank
-            }),
-            $("<input>").attr({
-                type: "hidden",
-                name: "navigation-link-uid[" + link.uid + "]",
-                value: link.navigationLinkUid
-            }),
-            $("<ul>")
-                .addClass("list-group navigation-links-children")
-                // Bloque l'ajout d'enfant au lien si il s'agit d'un enfant
-                .toggle(link.navigationLinkUid === 0)
-        )
-    ;
+    const $link = $("<li>");
+    $link.attr("data-uid", link.uid);
+    $link.addClass("navigation-link list-group-item list-group-item-action")
+    $link.append(
+        $("<div>")
+            .addClass("navigation-link-inner d-flex align-items-center")
+            .append(
+                $("<i>").addClass("fas fa-arrows-alt mr-3"),
+                $("<i>")
+                    .addClass(link.icon ? link.icon + " mr-2" : "")
+                    .attr("id", "visible-icon-" + link.uid),
+                $("<span>")
+                    .addClass("mr-3")
+                    .attr("id", "visible-title-" + link.uid).text(link.title),
+                $("<i>")
+                    .addClass("fas fa-times ml-auto")
+                    .attr({
+                        "data-toggle": "modal",
+                        "data-target": "#delete-modal"
+                    })
+            ),
+        $("<input>").attr({
+            type: "hidden",
+            name: "id[" + link.uid + "]",
+            value: link.id
+        }),
+        $("<input>").attr({
+            type: "hidden",
+            name: "icon[" + link.uid + "]",
+            value: link.icon
+        }),
+        $("<input>").attr({
+            type: "hidden",
+            name: "title[" + link.uid + "]",
+            value: link.title
+        }),
+        $("<input>").attr({
+            type: "hidden",
+            name: "page-id[" + link.uid + "]",
+            value: link.pageId
+        }),
+        $("<input>").attr({
+            type: "hidden",
+            name: "visibility[" + link.uid + "]",
+            value: link.visibility
+        }),
+        $("<input>").attr({
+            type: "hidden",
+            name: "blank[" + link.uid + "]",
+            value: link.blank
+        }),
+        $("<input>").attr({
+            type: "hidden",
+            name: "navigation-link-uid[" + link.uid + "]",
+            value: link.navigationLinkUid
+        }),
+        $("<ul>")
+            .addClass("list-group navigation-links-children")
+            // Bloque l'ajout d'enfant au lien si il s'agit d'un enfant
+            .toggle(link.navigationLinkUid === 0)
+    );
     // Tri des liens enfants
-    sortable(linkDOM.find(".navigation-links-children"), 0.9);
+    sortable($link.find(".navigation-links-children"), 0.9);
     // Ajoute le lien au DOM
-    var target = link.navigationLinkId
+    const linkContainer = link.navigationLinkId
         ? ".navigation-link[data-uid=" + link.navigationLinkUid + "] > .navigation-links-children"
         : "#navigation-links";
     if (prepend) {
-        linkDOM.prependTo(target);
+        $link.prependTo(linkContainer);
     } else {
-        linkDOM.appendTo(target);
+        $link.appendTo(linkContainer);
     }
-
     // Sélectionne le premier lien ajouté
     if ($("#navigation-links").children().length === 1) {
-        selectLink(linkDOM)
+        selectLink($link)
     }
 }
 
 // Sélection d'un lien
-var selectedUid;
-function selectLink(link) {
+let selectedUid;
+function selectLink($link) {
     // Sélectionne le lien
     $(".navigation-link.active").removeClass("active");
-    link.addClass("active");
-    selectedUid = link.data("uid");
+    $link.addClass("active");
+    selectedUid = $link.data("uid");
     // Affiche les champs d'éditions
     $("#navigation-link-fields").removeClass("d-none");
     // Mise à jour des champs d'édition
@@ -152,7 +148,7 @@ function selectLink(link) {
     $("#edit-visibility-" + $("[name='visibility[" + selectedUid + "]']").val()).prop("checked", true);
     // Sélectionne l'icône
     resetIconPicker();
-    var icon = $("[name='icon[" + selectedUid + "]']").val();
+    const icon = $("[name='icon[" + selectedUid + "]']").val();
     if (icon) {
         $("#edit-icon-dropdown-toggle").data("iconpicker").update(icon);
     }
@@ -170,14 +166,14 @@ function resetIconPicker() {
 
 // Active / Désactive la visibilité inherit
 function visibilityInheritDisabledToggle() {
-    var visibilityInherit = $("#edit-visibility-<?php echo Yocto\Session::VISIBILITY_INHERIT; ?>");
+    const $visibilityInherit = $("#edit-visibility-<?php echo Yocto\Session::VISIBILITY_INHERIT; ?>");
     if ($("[name='page-id[" + selectedUid + "]']").val() === "0") {
-        visibilityInherit.prop("disabled", true);
-        if (visibilityInherit.is(":checked")) {
+        $visibilityInherit.prop("disabled", true);
+        if ($visibilityInherit.is(":checked")) {
             $("#edit-visibility-<?php echo Yocto\Session::VISIBILITY_PUBLIC; ?>").prop("checked", true);
         }
     } else {
-        visibilityInherit.prop("disabled", false);
+        $visibilityInherit.prop("disabled", false);
     }
 }
 
@@ -197,7 +193,7 @@ $("#add").on("click", function () {
     }, true);
     selectLink($(".navigation-link").first())
     // Ferme le modal
-    $('#add-modal').modal('hide');
+    $("#add-modal").modal("hide");
 });
 
 // Supprime un lien
@@ -207,26 +203,26 @@ $("#delete-modal-submit").on("click", function () {
     selectedUid = undefined;
     // Cache les champs d'éditions
     $("#navigation-link-fields").addClass("d-none");
-    var links = $(".navigation-link");
-    if (links.length) {
-        selectLink(links.first())
+    const $links = $(".navigation-link");
+    if ($links.length) {
+        selectLink($links.first())
     }
     // Ferme le modal
-    $('#delete-modal').modal('hide');
+    $("#delete-modal").modal("hide");
 });
 
 // Sélecteur d'icône
-$("#edit-icon-dropdown-toggle")
-    .iconpicker({
-        animation: false,
-        templates: {
-            search: '<input type="search" class="form-control iconpicker-search" placeholder="Rechercher..." />'
-        }
-    })
-    .on("iconpickerSelected", function (event) {
-        $("#edit-icon").val(event.iconpickerValue).trigger("change");
-        $("#edit-icon-delete").prop("disabled", false);
-    });
+const $iconDropdownToggle = $("#edit-icon-dropdown-toggle")
+$iconDropdownToggle.iconpicker({
+    animation: false,
+    templates: {
+        search: '<input type="search" class="form-control iconpicker-search" placeholder="Rechercher..." />'
+    }
+})
+$iconDropdownToggle.on("iconpickerSelected", function (event) {
+    $("#edit-icon").val(event.iconpickerValue).trigger("change");
+    $("#edit-icon-delete").prop("disabled", false);
+});
 
 // Supprime l'icône sélectionné
 $("#edit-icon-delete").on("click", function () {
@@ -249,7 +245,7 @@ $("#edit-title").on("keyup change", function () {
     $("#visible-title-" + selectedUid).text($(this).val());
 });
 $("#edit-icon").on("change", function () {
-    var icon = $(this).val();
+    const icon = $(this).val();
     $("#visible-icon-" + selectedUid).attr("class", icon ? icon + " mr-2" : "");
 });
 
